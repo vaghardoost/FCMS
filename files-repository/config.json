@@ -1,0 +1,38 @@
+{
+  "name": "files",
+  "port": 1375,
+  "redis": {
+    "host": "redis",
+    "port": 6379
+  },
+  "kafka":{
+    "brokers":["kafka:9092"]
+  },
+  "token": {
+    "secret": "secret",
+    "ttl": 10
+  },
+  "mongo": {
+    "connection": "mongodb://mongo:27017/files"
+  },
+  "photo": {
+    "maxSize": "2",
+    "rate": "MB",
+    "path": "usr/file/photo"
+  },
+  "video": {
+    "maxSize": "100",
+    "rate": "MB",
+    "path": "usr/file/photo"
+  },
+  "audio": {
+    "maxSize": "100",
+    "rate": "MB",
+    "path": "usr/file/photo"
+  },
+  "doc": {
+    "maxSize": "100",
+    "rate": "MB",
+    "path": "usr/file/photo"
+  }
+}
