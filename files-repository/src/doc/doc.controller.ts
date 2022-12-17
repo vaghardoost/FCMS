@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -25,13 +26,17 @@ export class DocController {
   }
 
   @Get('list')
-  @UseGuards(AuthGuard)
   list() {
     return this.service.list();
   }
 
+  @Get('storage')
+  @UseGuards(AuthGuard)
+  storage(){
+    return this.service.refreshStorage();
+  }
+
   @Get(':id')
-  // @UseGuards(AuthGuard)
   download(@Param('id') id: string) {
     return this.service.get(id);
   }
@@ -40,5 +45,11 @@ export class DocController {
   @UseGuards(AuthGuard)
   reload() {
     return this.service.reload();
+  }
+  
+  @Delete(':id')
+  @UseGuards(AuthGuard)
+  delete(@Param('id') id:string){
+    return this.service.delete(id);
   }
 }

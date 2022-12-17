@@ -1,5 +1,6 @@
 /dist
 /node_modules
+/.run
 logs
 *.log
 npm-debug.log*

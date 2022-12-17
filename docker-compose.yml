@@ -18,23 +18,25 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    # ports:
+    #   - 29092:29092
   mongo:
     image: mongo
     container_name: mongo
-    ports:
-      - 27017:27017
+    # ports:
+    #   - 27017:27017
   redis:
     image: redis
     container_name: redis
-    ports:
-      - 26379:6379
+    # ports:
+    #   - 26379:6379
 # ---------------------- builds ----------------------
 # only API and file exposed to host
   api:
     build: ./rest-gateway
     container_name: api
     ports:
-      - 10022:1374
+      - 31374:1374
     depends_on:
       - kafka
       - redis
@@ -45,7 +47,9 @@ services:
       - kafka
       - redis
     ports:
-      - 10023:1375
+      - 31375:1375
+    volumes:
+      - ./volumes/file:/usr/app/file
   admin:
     build: ./microservices/admin
     container_name: admin

@@ -5,7 +5,7 @@ import {
   StreamableFile,
 } from '@nestjs/common';
 import { ConfigService } from '../config/config.service';
-import { createReadStream, writeFileSync } from 'fs';
+import { createReadStream, readdirSync, writeFileSync } from 'fs';
 import { randomBytes } from 'crypto';
 import { Model } from 'mongoose';
 import { FileModel } from '../app.file.model';
@@ -31,7 +31,7 @@ export class DocService {
       const { buffer, mimetype } = photo;
       const postfix = mimetype.split('/')[1];
       const name = Date.now().toString() + '.' + postfix;
-      const path = this.configService.config.doc.path + '\\' + name;
+      const path = this.configService.config.doc.path + '/' + name;
       writeFileSync(path, buffer);
       const fileData: FileModel = {
         path: path,
@@ -76,5 +76,33 @@ export class DocService {
       await this.redisService.save(doc.toJSON());
     }
     return { code: Code.Reload, success: true };
+  }
+
+  public async delete(id:string):Promise<Result<any>> {
+    const file = await this.model.findOneAndDelete<FileModel>({id:id});
+    await this.reload();
+    return {
+      code:Code.Delete,
+      success:true,
+      payload:file
+    }
+  }
+
+  public async refreshStorage():Promise<Result<string[]>> {
+    await this.reload();
+    const listResult:string[] = [];
+    const {path} = this.configService.config.doc;
+    const pathList = readdirSync(path);
+
+    for (const filePath of pathList) {
+      const result = await this.redisService.existsPath(path + "/" + filePath);
+      if (!result) listResult.push(filePath);
+    }
+
+    return {
+      code:Code.Storage,
+      success:true,
+      payload:listResult
+    }
   }
 }

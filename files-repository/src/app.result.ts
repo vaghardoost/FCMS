@@ -23,11 +23,14 @@ export enum HeaderCode {
   CONFLICT,
 }
 
-// microservice code = 1000
+// microservice code = 100
 export enum Code {
   Reload = 101,
   Create,
   SignIn,
   Upload,
+  Delete,
   GetList,
+  Storage,
+
 }

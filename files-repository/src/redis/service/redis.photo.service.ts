@@ -40,6 +40,17 @@ export class RedisPhotoService {
     return list;
   }
 
+  public async existsPath(path:string):Promise<boolean> {
+    const result = await this.redis.conn.hgetall(this.mapName);
+    for (const key in result) {
+      const file: FileModel = JSON.parse(result[key]);
+      if (file.path === path) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public async clear() {
     this.redis.conn.del(this.mapName);
   }

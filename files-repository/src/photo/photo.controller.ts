@@ -1,8 +1,9 @@
 import {
   Controller,
   Get,
-  Param,
   Post,
+  Delete,
+  Param,
   Req,
   UploadedFiles,
   UseGuards,
@@ -28,13 +29,17 @@ export class PhotoController {
   }
 
   @Get('list')
-  @UseGuards(AuthGuard)
   list() {
     return this.service.list();
   }
 
-  @Get(':id')
+  @Get('storage')
   @UseGuards(AuthGuard)
+  storage(){
+    return this.service.refreshStorage();
+  }
+
+  @Get(':id')
   download(@Param('id') id: string) {
     return this.service.get(id);
   }
@@ -43,5 +48,11 @@ export class PhotoController {
   @UseGuards(AuthGuard)
   reload() {
     return this.service.reload();
+  }
+
+  @Delete(':id')
+  @UseGuards(AuthGuard)
+  delete(@Param('id') id:string){
+    return this.service.delete(id);
   }
 }

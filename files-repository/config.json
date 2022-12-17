@@ -18,21 +18,21 @@
   "photo": {
     "maxSize": "2",
     "rate": "MB",
-    "path": "usr/file/photo"
+    "path": "file/photo"
   },
   "video": {
     "maxSize": "100",
     "rate": "MB",
-    "path": "usr/file/photo"
+    "path": "file/video"
   },
   "audio": {
     "maxSize": "100",
     "rate": "MB",
-    "path": "usr/file/photo"
+    "path": "file/audio"
   },
   "doc": {
     "maxSize": "100",
     "rate": "MB",
-    "path": "usr/file/photo"
+    "path": "file/doc"
   }
 }

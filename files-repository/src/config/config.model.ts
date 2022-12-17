@@ -1,5 +1,6 @@
 export interface ConfigModel {
   name: string;
+  port: number;
   redis: {
     port: number;
     host: string;

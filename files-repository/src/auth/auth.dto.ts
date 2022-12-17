@@ -7,6 +7,5 @@ export class AuthDto {
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(8)
   public password: string;
 }
