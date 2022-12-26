@@ -11,9 +11,9 @@ export class ConfigModule {
       readFileSync('config.json', { encoding: 'utf-8' }),
     );
     const paths = [ 
+      config.photo.path,
       config.video.path,
       config.audio.path,
-      config.photo.path,
       config.doc.path
     ];
     for (const path of paths) {

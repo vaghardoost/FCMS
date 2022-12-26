@@ -44,6 +44,11 @@ export class PhotoController {
     return this.service.get(id);
   }
 
+  @Get('demo/:id')
+  demo(@Param('id') id:string){
+    return this.service.get(id,{demo:true});
+  }
+
   @Post('reload')
   @UseGuards(AuthGuard)
   reload() {

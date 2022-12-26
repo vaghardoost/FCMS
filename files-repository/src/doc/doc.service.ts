@@ -35,6 +35,7 @@ export class DocService {
       writeFileSync(path, buffer);
       const fileData: FileModel = {
         path: path,
+        demo: '',
         id: randomBytes(16).toString('hex'),
         admin: admin,
         postfix: mimetype,

@@ -18,18 +18,18 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    # ports:
-    #   - 29092:29092
+    ports:
+      - 29092:29092
   mongo:
     image: mongo
     container_name: mongo
-    # ports:
-    #   - 27017:27017
+    ports:
+      - 27017:27017
   redis:
     image: redis
     container_name: redis
-    # ports:
-    #   - 26379:6379
+    ports:
+      - 26379:6379
 # ---------------------- builds ----------------------
 # only API and file exposed to host
   api:
@@ -56,3 +56,11 @@ services:
     depends_on:
       - kafka
       - redis
+      - mongo
+  note:
+    build: ./microservices/note
+    container_name: note
+    depends_on:
+      - kafka
+      - redis
+      - mongo
