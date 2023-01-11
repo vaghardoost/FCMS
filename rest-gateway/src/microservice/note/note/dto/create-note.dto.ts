@@ -11,6 +11,7 @@ export class CreateNoteDto {
 
     @IsString()
     @IsNotEmpty()
+    @IsOptional()
     public category:string;
 
     @IsArray()

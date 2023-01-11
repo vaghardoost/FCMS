@@ -23,7 +23,7 @@ export class NoteController implements OnModuleInit{
   @SetMetadata('role',[Role.Manager,Role.Author])
   @UseGuards(AuthGuard)
   async create(@Body(ValidationPipe) dto: CreateNoteDto,@Request() request:any) {
-    return this.client.send('note-create', {...dto,admin:request.user.id});
+    return this.client.send('note-create', {...dto,author:request.user.id});
   }
 
   @Get()

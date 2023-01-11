@@ -12,4 +12,19 @@ export class UpdateCatDto {
     @IsOptional()
     @IsNotEmpty()
     public parent:string
+
+    @IsString()
+    @IsOptional()
+    @IsNotEmpty()
+    public description:string;
+
+    @IsString()
+    @IsNotEmpty()
+    @IsOptional()
+    public color?:string;
+
+    @IsString()
+    @IsNotEmpty()
+    @IsOptional()
+    public avarat?:string;
 }

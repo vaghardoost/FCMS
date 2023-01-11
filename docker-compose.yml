@@ -40,6 +40,8 @@ services:
     depends_on:
       - kafka
       - redis
+    volumes:
+      - ./volumes/shared:/usr/app/shared
   file:
     build: ./files-repository
     container_name: file
