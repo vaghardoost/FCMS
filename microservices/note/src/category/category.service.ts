@@ -72,7 +72,8 @@ export class CategoryService {
         message: 'category update failed',
         success: false,
       };
-    } catch {
+    } catch (error) {
+      console.error('internal error',error);
       return ServiceError;
     }
   }
@@ -107,7 +108,8 @@ export class CategoryService {
         message: 'category delete failed',
         success: false,
       };
-    } catch {
+    } catch (error) {
+      console.error('internal error',error);
       return ServiceError;
     }
   }
@@ -125,7 +127,8 @@ export class CategoryService {
         success: true,
         payload: cat.toJSON(),
       };
-    } catch {
+    } catch (error) {
+      console.error('internal error',error);
       return ServiceError;
     }
   }

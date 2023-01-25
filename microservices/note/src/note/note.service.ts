@@ -39,7 +39,8 @@ export class NoteService {
       const model = new this.noteModel(note);
       await model.save();
       await this.redisService.addOrUpdate(note);
-    } catch {
+    } catch (error) {
+      console.error('internal error',error);
       return ServiceError;
     }
     return {
@@ -113,7 +114,8 @@ export class NoteService {
           message: 'note not founded',
           success: false,
         };
-    } catch {
+    } catch (error) {
+      console.error('internal error',error);
       return ServiceError;
     }
   }
@@ -138,7 +140,8 @@ export class NoteService {
         message: 'note note founded',
         success: false,
       };
-    } catch {
+    } catch (error) {
+      console.error('internal error',error);
       return ServiceError;
     }
   }
