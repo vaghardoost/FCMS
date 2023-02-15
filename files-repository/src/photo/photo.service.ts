@@ -4,7 +4,7 @@ import {
   Injectable,
   StreamableFile,
 } from '@nestjs/common';
-import { read as jimpRead} from "jimp"
+import { read as jimpRead } from "jimp"
 import { ConfigService } from '../config/config.service';
 import { createReadStream, readdirSync } from 'fs';
 import { randomBytes } from 'crypto';
@@ -22,7 +22,7 @@ export class PhotoService {
     private readonly configService: ConfigService,
     private readonly redisService: RedisPhotoService,
     @InjectModel('file') private readonly model: Model<FileModel>,
-  ) {}
+  ) { }
 
   public async upload(
     photos: Express.Multer.File[],
@@ -35,20 +35,20 @@ export class PhotoService {
       const name = Date.now().toString() + '.' + postfix;
       const path = this.configService.config.photo.path + '/' + name;
       const demoPath = this.configService.config.photo.path + '/demo.' + name;
-      
+
       writeFile(path, buffer);
 
-      jimpRead(buffer,(err,image)=>{
-        if (err) return console.error('error to read uploaded buffer at:',name);
+      jimpRead(buffer, (err, image) => {
+        if (err) return console.error('error to read uploaded buffer at:', name);
         const width = (image.getWidth() > 100) ? image.getWidth() / 10 : image.getWidth()
         const height = (image.getHeight() > 100) ? image.getHeight() / 10 : image.getHeight()
-        image.resize(width,height).quality(30).write(demoPath);
+        image.resize(width, height).quality(30).write(demoPath);
       })
-      
+
       const fileData: FileModel = {
         path: path,
         demo: demoPath,
-        id: randomBytes(16).toString('hex'),
+        id: `${randomBytes(16).toString('hex')}.${postfix}`,
         admin: admin,
         postfix: mimetype,
         type: 'photo',
@@ -62,10 +62,10 @@ export class PhotoService {
     return { code: Code.Upload, success: true, payload: result };
   }
 
-  public async get(id: string, options?:{ demo?: boolean }) {
+  public async get(id: string, options?: { demo?: boolean }) {
     const result = await this.redisService.get(id);
     if (result) {
-      const file = createReadStream(join( (options?.demo) ? result.demo : result.path ));
+      const file = createReadStream(join((options?.demo) ? result.demo : result.path));
       return new StreamableFile(file, { type: result.postfix });
     }
     throw new HttpException(
@@ -92,20 +92,20 @@ export class PhotoService {
     return { code: Code.Reload, success: true };
   }
 
-  public async delete(id:string): Promise<Result<any>>{
-    const file = await this.model.findOneAndDelete<FileModel>({id:id});
+  public async delete(id: string): Promise<Result<any>> {
+    const file = await this.model.findOneAndDelete<FileModel>({ id: id });
     await this.reload();
     return {
-      code:Code.Delete,
-      success:true,
-      payload:file
+      code: Code.Delete,
+      success: true,
+      payload: file
     }
   }
-  
-  public async refreshStorage():Promise<Result<string[]>> {
+
+  public async refreshStorage(): Promise<Result<string[]>> {
     await this.reload();
     const { path } = this.configService.config.photo;
-    const listResult:string[] = [];
+    const listResult: string[] = [];
     const pathList = readdirSync(path);
 
     for (const filePath of pathList) {
@@ -114,9 +114,9 @@ export class PhotoService {
     }
 
     return {
-      code:Code.Storage,
-      success:true,
-      payload:listResult
+      code: Code.Storage,
+      success: true,
+      payload: listResult
     }
   }
 }

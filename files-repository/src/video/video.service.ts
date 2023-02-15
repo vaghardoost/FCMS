@@ -20,7 +20,7 @@ export class VideoService {
     private readonly configService: ConfigService,
     private readonly redisService: RedisVideoService,
     @InjectModel('file') private readonly model: Model<FileModel>,
-  ) {}
+  ) { }
 
   public async upload(
     videos: Express.Multer.File[],
@@ -35,8 +35,8 @@ export class VideoService {
       writeFileSync(path, buffer);
       const fileData: FileModel = {
         path: path,
-        demo:'',
-        id: randomBytes(16).toString('hex'),
+        demo: '',
+        id: `${randomBytes(16).toString('hex')}.${postfix}`,
         admin: admin,
         postfix: mimetype,
         type: 'video',
@@ -79,19 +79,19 @@ export class VideoService {
     return { code: Code.Reload, success: true };
   }
 
-  public async delete(id:string): Promise<Result<any>>{
-    const file = await this.model.findOneAndDelete<FileModel>({id:id});
+  public async delete(id: string): Promise<Result<any>> {
+    const file = await this.model.findOneAndDelete<FileModel>({ id: id });
     await this.reload();
     return {
-      code:Code.Delete,
-      success:true,
-      payload:file
+      code: Code.Delete,
+      success: true,
+      payload: file
     }
   }
-  
-  public async refreshStorage():Promise<Result<string[]>> {
+
+  public async refreshStorage(): Promise<Result<string[]>> {
     await this.reload();
-    const listResult:string[] = [];
+    const listResult: string[] = [];
     const { path } = this.configService.config.video;
     const pathList = readdirSync(path);
 
@@ -101,9 +101,9 @@ export class VideoService {
     }
 
     return {
-      code:Code.Storage,
-      success:true,
-      payload:listResult
+      code: Code.Storage,
+      success: true,
+      payload: listResult
     }
   }
 }

@@ -36,7 +36,7 @@ export class DocService {
       const fileData: FileModel = {
         path: path,
         demo: '',
-        id: randomBytes(16).toString('hex'),
+        id: `${randomBytes(16).toString('hex')}.${postfix}`,
         admin: admin,
         postfix: mimetype,
         type: 'doc',
