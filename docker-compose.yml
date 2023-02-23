@@ -42,6 +42,13 @@ services:
       - redis
     volumes:
       - ./volumes/shared:/usr/app/shared
+    environment:
+      - NAME=rest_api_gate
+      - PORT=1374
+      - TOKEN_SECRET=secret
+      - TOEKN_TTL=60m
+      - KAFKA_BROKERS=kafka:9092
+      - KAFKA_CONSUMER=rest_api_gate
   file:
     build: ./files-repository
     container_name: file
@@ -52,6 +59,22 @@ services:
       - 31375:1375
     volumes:
       - ./volumes/file:/usr/app/file
+    environment:
+      - NAME=files
+      - PORT=1375
+      - REDIS=redis:6379
+      - KAFKA_BROKERS=kafka:9092
+      - TOKEN_SECRET=secret
+      - TOKEN_TTL=10m
+      - MONGO=mongodb://mongo:27017/files
+      - PHOTO_MAXSIZE=2 MB
+      - VIDEO_MAXSIZE=100 MB
+      - AUDIO_MAXSIZE=20 MB
+      - DOC_MAXSIZE=200 MB
+      - PHOTO_PATH=file/photo
+      - AUDIO_PATH=file/audio
+      - VIDEO_PATH=file/video
+      - DOC_PATH=file/doc
   admin:
     build: ./microservices/admin
     container_name: admin
@@ -59,6 +82,11 @@ services:
       - kafka
       - redis
       - mongo
+    environment:
+      - NAME=admin-service
+      - MONGO=mongodb://mongo:27017/admin
+      - REDIS=redis:6379
+      - KAFKA_BROKERS=kafka:9092
   note:
     build: ./microservices/note
     container_name: note
@@ -66,3 +94,10 @@ services:
       - kafka
       - redis
       - mongo
+    environment:
+      - NAME=note-service
+      - REDIS=redis:6379
+      - REDIS_EXPIRETIME=5
+      - MONGO=mongodb://mongo:27017/note_cms
+      - KAFKA_BROKER=kafka:9092
+      - KAFKA_GROUPID=note-consumer

@@ -9,14 +9,13 @@ import { MongooseModule } from '@nestjs/mongoose';
   imports: [
     NoteModule, CategoryModule, RedisModule,
     ConfigModule.forRoot(),
-    MongooseModule.forRoot('mongodb://localhost:27017/note_cms'),
-    // MongooseModule.forRootAsync({
-    //   imports: [ConfigModule],
-    //   inject: [ConfigService],
-    //   useFactory: async (service: ConfigService) => ({
-    //     uri: service.get<string>('MONGO')
-    //   })
-    // }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (service: ConfigService) => ({
+        uri: service.get<string>('MONGO')
+      })
+    }),
   ],
 })
 

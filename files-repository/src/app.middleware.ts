@@ -14,7 +14,6 @@ export class AuthMiddleware implements NestMiddleware {
         req.user = verify(
           accessToken,
           this.configService.get<string>('TOKEN_SECRET'),
-          this.configService.get<string>('TOKEN_TTL'),
         );
       } catch {
         throw new HttpException('bad token', HttpStatus.UNAUTHORIZED);
