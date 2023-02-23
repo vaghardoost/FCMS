@@ -1,17 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Inject, OnModuleInit,
-  Param,
-  Patch,
-  Post,
-  Request,
-  SetMetadata,
-  UseGuards,
-  ValidationPipe
-} from "@nestjs/common";
+import { Body, Controller, Delete, Get, Inject, OnModuleInit, Param, Patch, Post, Request, SetMetadata, UseGuards, ValidationPipe } from "@nestjs/common";
 import { UpdateCatDto } from "./dto/update-cat.dto";
 import { CreateCatDto } from "./dto/create-cat.dto";
 import { DeleteCatDto } from "./dto/delete-cat.dto";
@@ -20,9 +7,9 @@ import { AuthGuard } from "../../../module/auth/guard/auth.guard";
 import { Role } from "../../../module/auth/auth.role";
 
 @Controller('category')
-export class CategoryController implements OnModuleInit{
+export class CategoryController implements OnModuleInit {
 
-  constructor(@Inject('kafka-client') private readonly kafka:ClientKafka) {}
+  constructor(@Inject('kafka-client') private readonly kafka: ClientKafka) { }
 
   public onModuleInit() {
     this.kafka.subscribeToResponseOf("category");
@@ -35,39 +22,39 @@ export class CategoryController implements OnModuleInit{
 
   @Patch("refresh")
   @UseGuards(AuthGuard)
-  @SetMetadata('role',[Role.Manager,Role.Author])
-  public async refresh(){
-    return this.kafka.send('category-refresh',{});
+  @SetMetadata('role', [Role.Manager, Role.Author])
+  public async refresh() {
+    return this.kafka.send('category-refresh', {});
   }
 
   @Get(":id")
-  public async get(@Param('id') id:string){
-    return this.kafka.send('category',{id:id});
+  public async get(@Param('id') id: string) {
+    return this.kafka.send('category', { id: id });
   }
 
   @Get()
   public async list() {
-    return this.kafka.send('category-list',{});
+    return this.kafka.send('category-list', {});
   }
 
   @Patch(":id")
   @UseGuards(AuthGuard)
-  @SetMetadata('role',[Role.Manager,Role.Author])
-  public async update(@Param('id') id:string,@Body(ValidationPipe) dto:UpdateCatDto){
-    return this.kafka.send('category-update', { ...dto,id:id });
+  @SetMetadata('role', [Role.Manager, Role.Author])
+  public async update(@Param('id') id: string, @Body(ValidationPipe) dto: UpdateCatDto) {
+    return this.kafka.send('category-update', { ...dto, id: id });
   }
 
   @Post()
   @UseGuards(AuthGuard)
-  @SetMetadata('role',[Role.Manager,Role.Author])
-  public async create(@Body(ValidationPipe) dto:CreateCatDto,@Request() request:any) {
-    return this.kafka.send('category-create',{...dto,admin:request.user.id});
+  @SetMetadata('role', [Role.Manager, Role.Author])
+  public async create(@Body(ValidationPipe) dto: CreateCatDto, @Request() request: any) {
+    return this.kafka.send('category-create', { ...dto, admin: request.user.id });
   }
 
   @Delete()
   @UseGuards(AuthGuard)
-  @SetMetadata('role',[Role.Manager,Role.Author])
-  public async delete(@Body(ValidationPipe) dto:DeleteCatDto,@Request() request:any){
-    return this.kafka.send('category-delete',{...dto,user:request.user.id});
+  @SetMetadata('role', [Role.Manager, Role.Author])
+  public async delete(@Body(ValidationPipe) dto: DeleteCatDto, @Request() request: any) {
+    return this.kafka.send('category-delete', { ...dto, user: request.user.id });
   }
 }

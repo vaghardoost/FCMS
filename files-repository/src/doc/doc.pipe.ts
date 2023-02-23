@@ -1,17 +1,12 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  PipeTransform,
-} from '@nestjs/common';
-import { ConfigService } from '../config/config.service';
+import { HttpException, HttpStatus, Injectable, PipeTransform } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class DocPipe implements PipeTransform {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) { }
 
   transform(value: Express.Multer.File[]): any {
-    const { rate, maxSize } = this.configService.config.doc;
+    const [rate, maxSize] = this.configService.get<string>('DOC_MAXSIZE');
     if (!value) {
       throw new HttpException(
         { statusCode: 400, message: 'undefined files' },
@@ -31,13 +26,13 @@ export class DocPipe implements PipeTransform {
     function calculate(): number {
       switch (rate) {
         case 'B':
-          return maxSize;
+          return Number.parseInt(maxSize);
         case 'KB':
-          return maxSize * 1024;
+          return Number.parseInt(maxSize) * 1024;
         case 'MB':
-          return maxSize * 1024 * 1024;
+          return Number.parseInt(maxSize) * 1024 * 1024;
         case 'GB':
-          return maxSize * 1024 * 1024 * 1024;
+          return Number.parseInt(maxSize) * 1024 * 1024 * 1024;
       }
     }
     return value;

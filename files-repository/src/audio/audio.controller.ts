@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Req,
-  UploadedFiles,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AudioPipe } from './audio.pipe';
 import { AuthGuard } from '../auth/auth.guard';
 import { AudioService } from './audio.service';
@@ -16,7 +6,7 @@ import { AnyFilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('audio')
 export class AudioController {
-  constructor(private readonly service: AudioService) {}
+  constructor(private readonly service: AudioService) { }
 
   @Post('upload')
   @UseGuards(AuthGuard)
@@ -35,7 +25,7 @@ export class AudioController {
 
   @Get('storage')
   @UseGuards(AuthGuard)
-  storage(){
+  storage() {
     return this.service.refreshStorage();
   }
 
@@ -52,7 +42,7 @@ export class AudioController {
 
   @Delete(':id')
   @UseGuards(AuthGuard)
-  delete(@Param('id') id:string){
+  delete(@Param('id') id: string) {
     return this.service.delete(id);
   }
 }

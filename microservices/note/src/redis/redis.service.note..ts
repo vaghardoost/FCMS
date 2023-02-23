@@ -1,16 +1,16 @@
 import { RedisService } from './redis.service';
 import { Injectable } from '@nestjs/common';
 import { NoteModel } from '../note/note.model';
-import { ConfigService } from '../config/config.service';
+import { ConfigService } from "@nestjs/config"
 
 @Injectable()
 export class RedisNoteService {
-  private readonly redisNoteName = this.configService.config.name + '_note';
+  private readonly redisNoteName = `${this.configService.get<string>('NAME')}_note`;
 
   constructor(
     private readonly connection: RedisService,
-    private readonly configService: ConfigService,
-  ) {}
+    private configService: ConfigService
+  ) { }
 
   public async addOrUpdate(note: NoteModel) {
     await this.putOnRedis(note);
@@ -24,7 +24,7 @@ export class RedisNoteService {
     await this.connection.redis.set(note.id, JSON.stringify(note));
     await this.connection.redis.expire(
       note.id,
-      this.configService.config.redis.expireTime * 60,
+      this.configService.get<number>('REDIS_EXPIRETIME', 0) * 60,
     );
   }
 

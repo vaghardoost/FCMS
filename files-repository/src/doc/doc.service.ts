@@ -1,10 +1,5 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  StreamableFile,
-} from '@nestjs/common';
-import { ConfigService } from '../config/config.service';
+import { HttpException, HttpStatus, Injectable, StreamableFile } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { createReadStream, readdirSync, writeFileSync } from 'fs';
 import { randomBytes } from 'crypto';
 import { Model } from 'mongoose';
@@ -20,7 +15,7 @@ export class DocService {
     private readonly configService: ConfigService,
     private readonly redisService: RedisVideoService,
     @InjectModel('file') private readonly model: Model<FileModel>,
-  ) {}
+  ) { }
 
   public async upload(
     photos: Express.Multer.File[],
@@ -31,7 +26,7 @@ export class DocService {
       const { buffer, mimetype } = photo;
       const postfix = mimetype.split('/')[1];
       const name = Date.now().toString() + '.' + postfix;
-      const path = this.configService.config.doc.path + '/' + name;
+      const path = this.configService.get<string>('DOC_PATH') + '/' + name;
       writeFileSync(path, buffer);
       const fileData: FileModel = {
         path: path,
@@ -79,20 +74,20 @@ export class DocService {
     return { code: Code.Reload, success: true };
   }
 
-  public async delete(id:string):Promise<Result<any>> {
-    const file = await this.model.findOneAndDelete<FileModel>({id:id});
+  public async delete(id: string): Promise<Result<any>> {
+    const file = await this.model.findOneAndDelete<FileModel>({ id: id });
     await this.reload();
     return {
-      code:Code.Delete,
-      success:true,
-      payload:file
+      code: Code.Delete,
+      success: true,
+      payload: file
     }
   }
 
-  public async refreshStorage():Promise<Result<string[]>> {
+  public async refreshStorage(): Promise<Result<string[]>> {
     await this.reload();
-    const listResult:string[] = [];
-    const {path} = this.configService.config.doc;
+    const listResult: string[] = [];
+    const path = this.configService.get<string>('DOC_PATH');
     const pathList = readdirSync(path);
 
     for (const filePath of pathList) {
@@ -101,9 +96,9 @@ export class DocService {
     }
 
     return {
-      code:Code.Storage,
-      success:true,
-      payload:listResult
+      code: Code.Storage,
+      success: true,
+      payload: listResult
     }
   }
 }

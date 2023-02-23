@@ -1,10 +1,5 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  StreamableFile,
-} from '@nestjs/common';
-import { ConfigService } from '../config/config.service';
+import { HttpException, HttpStatus, Injectable, StreamableFile } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { createReadStream, readdirSync, writeFileSync } from 'fs';
 import { randomBytes } from 'crypto';
 import { Model } from 'mongoose';
@@ -22,16 +17,13 @@ export class AudioService {
     @InjectModel('file') private readonly model: Model<FileModel>,
   ) { }
 
-  public async upload(
-    audios: Express.Multer.File[],
-    admin: number,
-  ): Promise<Result<FileModel[]>> {
+  public async upload(audios: Express.Multer.File[], admin: number): Promise<Result<FileModel[]>> {
     const result = [];
     for (const audio of audios) {
       const { buffer, mimetype } = audio;
       const postfix = mimetype.split('/')[1];
       const name = Date.now().toString() + '.' + postfix;
-      const path = this.configService.config.audio.path + '/' + name;
+      const path = this.configService.get<string>('AUDIO_PATH') + '/' + name;
       writeFileSync(path, buffer);
       const fileData: FileModel = {
         path: path,
@@ -92,7 +84,7 @@ export class AudioService {
   public async refreshStorage(): Promise<Result<string[]>> {
     await this.reload();
     const listResult: string[] = [];
-    const { path } = this.configService.config.audio;
+    const path = this.configService.get<string>('AUDIO_PATH');
     const pathList = readdirSync(path);
 
     for (const filePath of pathList) {

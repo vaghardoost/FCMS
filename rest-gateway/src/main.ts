@@ -1,10 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ConfigService } from './module/config/config.service';
+import { ConfigService } from '@nestjs/config';
+import { ValidationPipe } from "@nestjs/common";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule,{cors:true});
+  const app = await NestFactory.create(AppModule, { cors: true });
+  app.useGlobalPipes(new ValidationPipe());
+
   const configService = app.get(ConfigService)
-  await app.listen(configService.config.port);
+  await app.listen(Number.parseInt(configService.get<string>('PORT')));
 }
+
 bootstrap();

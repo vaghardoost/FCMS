@@ -6,14 +6,14 @@ import { RedisNoteService } from '../redis/redis.service.note.';
 import { NoteUpdateDto } from './dto/note.update.dto';
 import { Code, Result, ServiceError } from '../app.result';
 import { NoteCreateDto } from './dto/note.create.dto';
-import { randomUUID } from 'crypto';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class NoteService {
   constructor(
     @InjectModel('note') private readonly noteModel: Model<NoteModel>,
     private readonly redisService: RedisNoteService,
-  ) {}
+  ) { }
 
   async refreshRedis(): Promise<Result<number>> {
     const allNotes = await this.noteModel
@@ -31,7 +31,7 @@ export class NoteService {
   async create(dto: NoteCreateDto): Promise<Result<NoteModel>> {
     const note: NoteModel = {
       ...dto,
-      id: randomUUID(),
+      id: randomBytes(8).toString('hex'),
       tag: dto.tag ?? [],
       createAt: Date.now().toString(),
     };
@@ -40,12 +40,12 @@ export class NoteService {
       await model.save();
       await this.redisService.addOrUpdate(note);
     } catch (error) {
-      console.error('internal error',error);
+      console.error('internal error', error);
       return ServiceError;
     }
     return {
       code: Code.CreateNote,
-      message:'note has been saved',
+      message: 'note has been saved',
       success: true,
       payload: note,
     };
@@ -96,26 +96,26 @@ export class NoteService {
         .findOneAndUpdate<NoteModel>({ id: noteUpdateDto.id }, noteUpdateDto, {
           projection: { _id: 0 },
         }).lean();
-        if (result) {
-          const updatedResult: NoteModel = {
-            ...result,
-            ...noteUpdateDto,
-          };
-          await this.redisService.addOrUpdate(updatedResult);
-          return {
-            code: Code.NoteUpdate,
-            message: 'note updated',
-            success: true,
-            payload: updatedResult,
-          };
-        }
+      if (result) {
+        const updatedResult: NoteModel = {
+          ...result,
+          ...noteUpdateDto,
+        };
+        await this.redisService.addOrUpdate(updatedResult);
         return {
           code: Code.NoteUpdate,
-          message: 'note not founded',
-          success: false,
+          message: 'note updated',
+          success: true,
+          payload: updatedResult,
         };
+      }
+      return {
+        code: Code.NoteUpdate,
+        message: 'note not founded',
+        success: false,
+      };
     } catch (error) {
-      console.error('internal error',error);
+      console.error('internal error', error);
       return ServiceError;
     }
   }
@@ -141,7 +141,7 @@ export class NoteService {
         success: false,
       };
     } catch (error) {
-      console.error('internal error',error);
+      console.error('internal error', error);
       return ServiceError;
     }
   }

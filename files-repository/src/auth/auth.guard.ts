@@ -1,18 +1,10 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-  OnModuleInit,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, HttpException, HttpStatus, Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { HeaderCode, MicroserviceRes } from '../app.result';
 
 @Injectable()
 export class AuthGuard implements CanActivate, OnModuleInit {
-  constructor(@Inject('kafka-client') private readonly kafka: ClientKafka) {}
+  constructor(@Inject('kafka-client') private readonly kafka: ClientKafka) { }
 
   async onModuleInit() {
     this.kafka.subscribeToResponseOf('admin.inquiry');

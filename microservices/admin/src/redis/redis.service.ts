@@ -1,16 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import Redis from 'ioredis';
-import { ConfigService } from '../config/config.service';
 import { AdminModel } from '../admin/admin.model';
+import { ConfigService } from "@nestjs/config"
 
 @Injectable()
 export class RedisService {
   private readonly conn: Redis;
-  private readonly adminMapName = this.configService.config.name + '_admin';
+  private readonly adminMapName = `${this.configService.get('NAME')}_admin`;
 
   constructor(private readonly configService: ConfigService) {
-    const { port, host } = configService.config.redis;
-    this.conn = new Redis(port, host);
+    this.conn = new Redis(configService.get("REDIS"));
   }
 
   public async addUser(id: number, user: AdminModel): Promise<number> {

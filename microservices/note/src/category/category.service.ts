@@ -8,7 +8,7 @@ import { CategoryModel } from './category.model';
 import { RedisCategoryService } from '../redis/redis.service.cat';
 import { RedisNoteService } from '../redis/redis.service.note.';
 import { Code, Result, ServiceError } from '../app.result';
-import { randomUUID } from 'crypto';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class CategoryService {
@@ -16,7 +16,7 @@ export class CategoryService {
     @InjectModel('category') private readonly catModel: Model<CategoryModel>,
     private readonly redisService: RedisCategoryService,
     private readonly redisNote: RedisNoteService,
-  ) {}
+  ) { }
 
   async getCategory(id: string): Promise<Result<CategoryModel | undefined>> {
     const allNotes = await this.redisNote.getAllNotes();
@@ -73,7 +73,7 @@ export class CategoryService {
         success: false,
       };
     } catch (error) {
-      console.error('internal error',error);
+      console.error('internal error', error);
       return ServiceError;
     }
   }
@@ -109,18 +109,18 @@ export class CategoryService {
         success: false,
       };
     } catch (error) {
-      console.error('internal error',error);
+      console.error('internal error', error);
       return ServiceError;
     }
   }
 
   async create(dto: CreateCatDto): Promise<Result<CategoryModel>> {
     try {
-      const category: CategoryModel = { ...dto, id: randomUUID() };  
+      const category: CategoryModel = { ...dto, id: randomBytes(8).toString('hex') };
       const model = new this.catModel(category);
       const cat = await model.save();
       await this.redisService.addCategory(cat);
-      
+
       return {
         code: Code.CreateCategory,
         message: 'category has ben created',
@@ -128,7 +128,7 @@ export class CategoryService {
         payload: cat.toJSON(),
       };
     } catch (error) {
-      console.error('internal error',error);
+      console.error('internal error', error);
       return ServiceError;
     }
   }

@@ -1,11 +1,6 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  StreamableFile,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, StreamableFile } from '@nestjs/common';
 import { read as jimpRead } from "jimp"
-import { ConfigService } from '../config/config.service';
+import { ConfigService } from '@nestjs/config';
 import { createReadStream, readdirSync } from 'fs';
 import { randomBytes } from 'crypto';
 import { Model } from 'mongoose';
@@ -33,8 +28,8 @@ export class PhotoService {
       const { buffer, mimetype } = photo;
       const postfix = mimetype.split('/')[1];
       const name = Date.now().toString() + '.' + postfix;
-      const path = this.configService.config.photo.path + '/' + name;
-      const demoPath = this.configService.config.photo.path + '/demo.' + name;
+      const path = this.configService.get<string>('PHOTO_PATH') + '/' + name;
+      const demoPath = this.configService.get<string>('PHOTO_PATH') + '/demo.' + name;
 
       writeFile(path, buffer);
 
@@ -104,7 +99,7 @@ export class PhotoService {
 
   public async refreshStorage(): Promise<Result<string[]>> {
     await this.reload();
-    const { path } = this.configService.config.photo;
+    const path = this.configService.get<string>('PHOTO_PATH');
     const listResult: string[] = [];
     const pathList = readdirSync(path);
 

@@ -1,43 +1,36 @@
-import { DynamicModule, Module } from '@nestjs/common';
-import { DocController } from './doc.controller';
-import { DocService } from './doc.service';
+import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { ConfigModule } from '../config/config.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { FileSchema } from '../app.schema';
 import { RedisModule } from '../redis/redis.module';
-import { readFileSync } from 'fs';
-import { ConfigModel } from 'src/config/config.model';
+import { ConfigModule, ConfigService } from "@nestjs/config"
+import { AuthService } from 'src/auth/auth.service';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthController } from 'src/auth/auth.controller';
 
-@Module({})
-export class DocModule {
-  static register():DynamicModule{
-    const data: string = readFileSync('config.json', { encoding: 'utf-8' });
-    const config:ConfigModel = JSON.parse(data);
-    return {
-      module:DocModule,
-      controllers: [DocController],
-      providers: [DocService],
-      imports: [
-        RedisModule,
-        ConfigModule,
-        MongooseModule.forFeature([{ name: 'file', schema: FileSchema }]),
-        ClientsModule.register([
-          {
-            name: 'kafka-client',
-            transport: Transport.KAFKA,
-            options: {
-              client: {
-                clientId: 'video.module',
-                brokers: config.kafka.brokers,
-              },
-              consumer: {
-                groupId: 'file.video',
-              },
+@Module({
+  imports: [
+    MongooseModule.forFeature([{ name: 'file', schema: FileSchema }]),
+    ClientsModule.registerAsync([
+      {
+        name: 'kafka-client',
+        imports: [ConfigModule, RedisModule],
+        inject: [ConfigService],
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.KAFKA,
+          options: {
+            client: {
+              clientId: 'file',
+              brokers: configService.get<string>('KAFKA_BROKERS').split(' ')
             },
-          },
-        ]),
-      ],
-    }
-  }
-}
+            consumer: { groupId: 'file.doc' },
+          }
+        }),
+      }
+    ]),
+  ],
+  providers: [AuthService, AuthGuard],
+  exports: [AuthGuard],
+  controllers: [AuthController],
+})
+export class DocModule { }

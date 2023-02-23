@@ -3,14 +3,14 @@ import { AuthDto } from './auth.dto';
 import { ClientKafka } from '@nestjs/microservices';
 import { Code, HeaderCode, MicroserviceRes, Result } from '../app.result';
 import { sign } from 'jsonwebtoken';
-import { ConfigService } from '../config/config.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
   constructor(
     @Inject('kafka-client') private readonly kafka: ClientKafka,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   async onModuleInit() {
     this.kafka.subscribeToResponseOf('auth.admin');
@@ -23,8 +23,9 @@ export class AuthService implements OnModuleInit {
       res.subscribe((value) => {
         const { code, payload } = value.header;
         if (code === HeaderCode.SUCCESS) {
-          const { secret } = this.configService.config.token;
-          const token = sign({ ...payload, password: dto.password }, secret);
+          const secret = this.configService.get<string>('TOKEN_SECRET');
+          const ttl = this.configService.get<string>('TOKEN_TTL');
+          const token = sign({ ...payload, password: dto.password }, secret, { expiresIn: ttl });
           resolve({
             success: true,
             code: Code.SignIn,

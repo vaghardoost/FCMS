@@ -1,10 +1,5 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  StreamableFile,
-} from '@nestjs/common';
-import { ConfigService } from '../config/config.service';
+import { HttpException, HttpStatus, Injectable, StreamableFile } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { createReadStream, readdirSync, writeFileSync } from 'fs';
 import { randomBytes } from 'crypto';
 import { Model } from 'mongoose';
@@ -31,7 +26,7 @@ export class VideoService {
       const { buffer, mimetype } = video;
       const postfix = mimetype.split('/')[1];
       const name = Date.now().toString() + '.' + postfix;
-      const path = this.configService.config.video.path + '/' + name;
+      const path = this.configService.get<string>('VIDEO_PATH') + '/' + name;
       writeFileSync(path, buffer);
       const fileData: FileModel = {
         path: path,
@@ -92,7 +87,7 @@ export class VideoService {
   public async refreshStorage(): Promise<Result<string[]>> {
     await this.reload();
     const listResult: string[] = [];
-    const { path } = this.configService.config.video;
+    const path = this.configService.get<string>('VIDEO_PATH');
     const pathList = readdirSync(path);
 
     for (const filePath of pathList) {

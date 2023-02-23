@@ -8,6 +8,7 @@ export const NoteSchema = new Schema(
     author: { required: true, type: Number },
     createAt: { required: true, type: String },
     tag: { required: true, type: Array<string> },
+    photo: { type: String },
     category: { type: String },
   },
   { versionKey: false },

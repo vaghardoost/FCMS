@@ -1,17 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { RedisService } from './redis.service';
-import { ConfigService } from '../config/config.service';
 import { CategoryModel } from '../category/category.model';
+import { ConfigService } from "@nestjs/config"
 
 @Injectable()
 export class RedisCategoryService {
-  private readonly categoryRedisName =
-    this.configService.config.name + '_category';
+  private readonly categoryRedisName = `${this.configService.get<string>('NAME')}_category`;
 
   constructor(
     private connection: RedisService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   public async refreshCategories(
     categories: CategoryModel[],

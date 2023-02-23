@@ -9,8 +9,8 @@ import { MongooseModule } from '@nestjs/mongoose';
   controllers: [CategoryController],
   providers: [CategoryService],
   imports: [
-    RedisModule,
     MongooseModule.forFeature([{ name: 'category', schema: CategorySchema }]),
+    RedisModule,
   ],
 })
-export class CategoryModule {}
+export class CategoryModule { }

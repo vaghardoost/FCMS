@@ -7,8 +7,8 @@ import { Role } from "../../../module/auth/auth.role";
 import { AuthGuard } from "../../../module/auth/guard/auth.guard";
 
 @Controller("note")
-export class NoteController implements OnModuleInit{
-  constructor(@Inject('kafka-client') private readonly client:ClientKafka) {}
+export class NoteController implements OnModuleInit {
+  constructor(@Inject('kafka-client') private readonly client: ClientKafka) { }
 
   onModuleInit() {
     this.client.subscribeToResponseOf("note");
@@ -20,41 +20,41 @@ export class NoteController implements OnModuleInit{
   }
 
   @Post()
-  @SetMetadata('role',[Role.Manager,Role.Author])
+  @SetMetadata('role', [Role.Manager, Role.Author])
   @UseGuards(AuthGuard)
-  async create(@Body(ValidationPipe) dto: CreateNoteDto,@Request() request:any) {
-    return this.client.send('note-create', {...dto,author:request.user.id});
+  async create(@Body(ValidationPipe) dto: CreateNoteDto, @Request() request: any) {
+    return this.client.send('note-create', { ...dto, author: request.user.id });
   }
 
   @Get()
   async list() {
-    return this.client.send('note-list',{});
+    return this.client.send('note-list', {});
   }
 
 
   @Get(':id')
   async get(@Param('id') id: string) {
-    return this.client.send('note',{id:id});
+    return this.client.send('note', { id: id });
   }
 
   @Patch('refresh')
-  @SetMetadata('role',[Role.Manager,Role.Author])
+  @SetMetadata('role', [Role.Manager, Role.Author])
   @UseGuards(AuthGuard)
-  async refresh(){
-    return this.client.send('note-refresh',{});
+  async refresh() {
+    return this.client.send('note-refresh', {});
   }
 
   @Patch(':id')
-  @SetMetadata('role',[Role.Manager,Role.Author])
+  @SetMetadata('role', [Role.Manager, Role.Author])
   @UseGuards(AuthGuard)
-  async update(@Param('id') id:string, @Body(ValidationPipe) updateNoteDto: UpdateNoteDto) {
-    return this.client.send('note-update', { ...updateNoteDto,id:id });
+  async update(@Body(ValidationPipe) dto: UpdateNoteDto, @Param('id') id: string) {
+    return this.client.send('note-update', { ...dto, id: id });
   }
 
   @Delete()
-  @SetMetadata('role',[Role.Manager,Role.Author])
+  @SetMetadata('role', [Role.Manager, Role.Author])
   @UseGuards(AuthGuard)
-  async remove(@Body(ValidationPipe) deleteDto:DeleteNoteDto) {
-    return this.client.send('note-delete',{id:deleteDto.id});
+  async remove(@Body(ValidationPipe) deleteDto: DeleteNoteDto) {
+    return this.client.send('note-delete', { id: deleteDto.id });
   }
 }

@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Req,
-  UploadedFiles,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { VideoPipe } from './video.pipe';
 import { AuthGuard } from '../auth/auth.guard';
 import { VideoService } from './video.service';
@@ -16,15 +6,12 @@ import { AnyFilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('video')
 export class VideoController {
-  constructor(private readonly service: VideoService) {}
+  constructor(private readonly service: VideoService) { }
 
   @Post('upload')
   @UseGuards(AuthGuard)
   @UseInterceptors(AnyFilesInterceptor())
-  upload(
-    @UploadedFiles(VideoPipe) photos: Express.Multer.File[],
-    @Req() req: any,
-  ) {
+  upload(@UploadedFiles(VideoPipe) photos: Express.Multer.File[], @Req() req: any) {
     return this.service.upload(photos, req.user.id);
   }
 
@@ -35,7 +22,7 @@ export class VideoController {
 
   @Get('storage')
   @UseGuards(AuthGuard)
-  storage(){
+  storage() {
     return this.service.refreshStorage();
   }
 
@@ -52,7 +39,7 @@ export class VideoController {
 
   @Delete(':id')
   @UseGuards(AuthGuard)
-  delete(@Param('id') id:string){
+  delete(@Param('id') id: string) {
     return this.service.delete(id);
   }
 }

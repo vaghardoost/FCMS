@@ -1,30 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { readFileSync } from 'fs';
-import { ConfigModel } from './config/config.model';
+import { ConfigService } from "@nestjs/config"
 
 async function bootstrap() {
-  const data = readFileSync('config.json', {
-    encoding: 'utf-8',
-  });
-  const config: ConfigModel = JSON.parse(data);
-  const { brokers } = config.kafka;
+  const app = await NestFactory.create(AppModule);
 
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-    AppModule,
-    {
-      transport: Transport.KAFKA,
-      options: {
-        client: {
-          brokers: brokers,
-        },
-        consumer: {
-          groupId: 'note-consumer',
-        },
-      },
+  const configService = app.get<ConfigService>(ConfigService);
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.KAFKA,
+    options: {
+      client: { brokers: configService.get<string>('KAFKA_BROKER').split(' ') },
+      consumer: { groupId: configService.get<string>('KAFKA_GROUPID') },
     },
-  );
-  await app.listen();
+  })
+  app.startAllMicroservices();
 }
 bootstrap();

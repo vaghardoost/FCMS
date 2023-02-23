@@ -7,10 +7,10 @@ import { NoteService } from './note.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: 'note', schema: NoteSchema }]),
     RedisModule,
+    MongooseModule.forFeature([{ name: 'note', schema: NoteSchema }]),
   ],
   controllers: [NoteController],
   providers: [NoteService],
 })
-export class NoteModule {}
+export class NoteModule { }

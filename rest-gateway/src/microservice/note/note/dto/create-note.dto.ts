@@ -3,19 +3,24 @@ import { IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator";
 export class CreateNoteDto {
     @IsString()
     @IsNotEmpty()
-    public title:string;
-
-    @IsArray()
-    @IsNotEmpty()
-    public content:Array<any>;
+    public title: string;
 
     @IsString()
     @IsNotEmpty()
     @IsOptional()
-    public category:string;
+    public photo: string;
 
     @IsArray()
-    @IsString({each:true})
+    @IsNotEmpty()
+    public content: Array<any>;
+
+    @IsString()
+    @IsNotEmpty()
     @IsOptional()
-    public tag?:string[];
+    public category: string;
+
+    @IsArray()
+    @IsString({ each: true })
+    @IsOptional()
+    public tag?: string[];
 }

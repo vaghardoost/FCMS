@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { RedisService } from '../redis.service';
 import { FileModel } from '../../app.file.model';
-import { ConfigService } from '../../config/config.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class RedisAudioService {
@@ -11,7 +11,7 @@ export class RedisAudioService {
     private readonly redis: RedisService,
     private readonly configService: ConfigService,
   ) {
-    this.mapName = configService.config.name + '-audio';
+    this.mapName = configService.get<string>('NAME') + '-audio';
   }
 
   public async save(audio: FileModel) {

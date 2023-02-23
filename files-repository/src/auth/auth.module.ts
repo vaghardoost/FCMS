@@ -1,40 +1,32 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { ConfigModule } from '../config/config.module';
 import { AuthGuard } from './auth.guard';
-import { readFileSync } from 'fs';
-import { ConfigModel } from 'src/config/config.model';
+import { ConfigModule, ConfigService } from "@nestjs/config"
 
-@Module({})
-export class AuthModule {
-  static register(): DynamicModule{
-    const data: string = readFileSync('config.json', { encoding: 'utf-8' });
-    const config:ConfigModel = JSON.parse(data);
-    return {
-      module:AuthModule,
-      imports: [
-        ConfigModule,
-        ClientsModule.register([
-          {
-            name: 'kafka-client',
-            transport: Transport.KAFKA,
-            options: {
-              client: {
-                clientId: 'file',
-                brokers: config.kafka.brokers,
-              },
-              consumer: {
-                groupId: 'file.auth',
-              },
+@Module({
+  imports: [
+    ClientsModule.registerAsync([
+      {
+        name: 'kafka-client',
+        imports: [ConfigModule],
+        inject: [ConfigService],
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.KAFKA,
+          options: {
+            client: {
+              clientId: 'file',
+              brokers: configService.get<string>('KAFKA_BROKERS').split(' ')
             },
-          },
-        ]),
-      ],
-      providers: [AuthService, AuthGuard],
-      exports: [AuthGuard],
-      controllers: [AuthController],
-    }
-  }
-}
+            consumer: { groupId: 'file.auth' },
+          }
+        }),
+      }
+    ]),
+  ],
+  providers: [AuthService, AuthGuard],
+  exports: [AuthGuard],
+  controllers: [AuthController],
+})
+export class AuthModule { }

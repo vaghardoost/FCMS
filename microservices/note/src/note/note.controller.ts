@@ -5,12 +5,11 @@ import { NoteFindDto } from './dto/note.find.dto';
 import { NoteDeleteDto } from './dto/note.delete.dto';
 import { NoteUpdateDto } from './dto/note.update.dto';
 import { NoteCreateDto } from './dto/note.create.dto';
-import { AuthGuard } from '../auth.guard';
+
 @Controller()
 export class NoteController {
-  constructor(private readonly service: NoteService) {}
+  constructor(private readonly service: NoteService) { }
 
-  @UseGuards(AuthGuard)
   @MessagePattern('note-list')
   public list() {
     return this.service.list();

@@ -1,14 +1,14 @@
 {
   "name": "note-service",
   "redis": {
-    "host": "redis",
-    "port": 6379,
+    "host": "localhost",
+    "port": 26379,
     "expireTime": 2
   },
   "mongo": {
-    "connection":"mongodb://mongo:27017/note_cms"
+    "connection":"mongodb://localhost:27017/note_cms"
   },
   "kafka":{
-    "brokers":["kafka:9092"]
+    "brokers":["localhost:29092"]
   }
 }
