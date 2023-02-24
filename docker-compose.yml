@@ -46,7 +46,7 @@ services:
       - NAME=rest_api_gate
       - PORT=1374
       - TOKEN_SECRET=secret
-      - TOEKN_TTL=60m
+      - TOEKN_TTL=4h
       - KAFKA_BROKERS=kafka:9092
       - KAFKA_CONSUMER=rest_api_gate
   file:
@@ -65,7 +65,7 @@ services:
       - REDIS=redis:6379
       - KAFKA_BROKERS=kafka:9092
       - TOKEN_SECRET=secret
-      - TOKEN_TTL=10m
+      - TOKEN_TTL=4h
       - MONGO=mongodb://mongo:27017/files
       - PHOTO_MAXSIZE=2 MB
       - VIDEO_MAXSIZE=100 MB

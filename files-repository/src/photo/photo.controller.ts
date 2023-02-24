@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Delete,
-  Param,
-  Req,
-  UploadedFiles,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { PhotoPipe } from './photo.pipe';
 import { AuthGuard } from '../auth/auth.guard';
 import { PhotoService } from './photo.service';
@@ -16,15 +6,12 @@ import { AnyFilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('photo')
 export class PhotoController {
-  constructor(private readonly service: PhotoService) {}
+  constructor(private readonly service: PhotoService) { }
 
   @Post('upload')
   @UseGuards(AuthGuard)
   @UseInterceptors(AnyFilesInterceptor())
-  upload(
-    @UploadedFiles(PhotoPipe) photos: Express.Multer.File[],
-    @Req() req: any,
-  ) {
+  upload(@UploadedFiles(PhotoPipe) photos: Express.Multer.File[], @Req() req: any) {
     return this.service.upload(photos, req.user.id);
   }
 
@@ -35,7 +22,7 @@ export class PhotoController {
 
   @Get('storage')
   @UseGuards(AuthGuard)
-  storage(){
+  storage() {
     return this.service.refreshStorage();
   }
 
@@ -45,8 +32,8 @@ export class PhotoController {
   }
 
   @Get('demo/:id')
-  demo(@Param('id') id:string){
-    return this.service.get(id,{demo:true});
+  demo(@Param('id') id: string) {
+    return this.service.get(id, { demo: true });
   }
 
   @Post('reload')
@@ -57,7 +44,7 @@ export class PhotoController {
 
   @Delete(':id')
   @UseGuards(AuthGuard)
-  delete(@Param('id') id:string){
+  delete(@Param('id') id: string) {
     return this.service.delete(id);
   }
 }

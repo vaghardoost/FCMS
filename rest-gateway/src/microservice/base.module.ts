@@ -1,5 +1,5 @@
-import { Inject, OnModuleInit, Module } from "@nestjs/common";
-import { ClientKafka, ClientsModule, Transport } from "@nestjs/microservices";
+import { Module } from "@nestjs/common";
+import { ClientsModule, Transport } from "@nestjs/microservices";
 import { NoteController } from "./note/note/note.controller";
 import { CategoryController } from "./note/category/category.controller";
 import { AdminController } from "./admin/admin.controller";
@@ -13,7 +13,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
       name: "kafka-client",
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService:ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         transport: Transport.KAFKA,
         options: {
           client: {
@@ -28,9 +28,4 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
     }])
   ]
 })
-export class MicroserviceModule implements OnModuleInit {
-  constructor(@Inject('kafka-client') private readonly client: ClientKafka) { }
-  async onModuleInit() {
-    await this.client.connect();
-  }
-}
+export class MicroserviceModule { }

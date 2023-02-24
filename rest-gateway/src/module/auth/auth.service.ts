@@ -14,18 +14,20 @@ export class AuthService implements OnModuleInit {
 
   async onModuleInit() {
     this.kafka.subscribeToResponseOf('auth.admin');
+    await this.kafka.connect();
   }
 
   public async admin(dto: AuthDto): Promise<Response<any>> {
     const res = this.kafka.send<MicroserviceRes<any>, string>('auth.admin', JSON.stringify(dto));
+
     return new Promise<Response<any>>(resolve => {
       res.subscribe(message => {
         const { header, response } = message;
         if (header.code === HeaderCode.SUCCESS) {
-          const ttl = this.configService.get<string>('TOKEN_TTL');
           const secret = this.configService.get<string>('TOKEN_SECRET');
+          const ttl = this.configService.get<string>('TOKEN_TTL');
           const { payload } = header
-          response.payload = { token: sign({ ...payload, password: dto.password }, secret, { expiresIn: ttl }) }
+          response.payload = { token: sign({ ...payload, password: dto.password }, secret, { expiresIn: ttl || '0' }) }
         }
         resolve(response)
       })

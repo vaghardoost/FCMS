@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod, OnModuleInit } from '@nestjs/common';
 import { PhotoModule } from './photo/photo.module';
 import { RedisModule } from './redis/redis.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -8,6 +8,7 @@ import { VideoModule } from './video/video.module';
 import { DocModule } from './doc/doc.module';
 import { AudioModule } from './audio/audio.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import * as fs from "fs";
 
 @Module({
   imports: [
@@ -22,7 +23,24 @@ import { MongooseModule } from '@nestjs/mongoose';
     }),
   ],
 })
-export class AppModule implements NestModule {
+export class AppModule implements NestModule, OnModuleInit {
+  constructor(private readonly configService: ConfigService) { }
+
+  async onModuleInit() {
+    const paths = [
+      this.configService.get<string>('PHOTO_PATH'),
+      this.configService.get<string>('AUDIO_PATH'),
+      this.configService.get<string>('VIDEO_PATH'),
+      this.configService.get<string>('DOC_PATH')
+    ]
+
+    for (const path of paths) {
+      if (!fs.existsSync(path)) {
+        fs.mkdirSync(path, { recursive: true });
+      }
+    }
+  }
+
   configure(consumer: MiddlewareConsumer): any {
     consumer
       .apply(AuthMiddleware)
