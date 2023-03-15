@@ -7,7 +7,7 @@ import { AuthDto } from './auth.dto';
 export class AuthController {
   constructor(private readonly service: AuthService) {}
 
-  @MessagePattern('auth.admin')
+  @MessagePattern('admin.auth')
   public auth(@Payload() dto: AuthDto) {
     return this.service.auth(dto);
   }

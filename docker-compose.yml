@@ -20,6 +20,8 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     ports:
       - 29092:29092
+    depends_on:
+      - zookeeper
   mongo:
     image: mongo
     container_name: mongo
@@ -32,9 +34,10 @@ services:
       - 26379:6379
 # ---------------------- builds ----------------------
 # only API and file exposed to host
-  api:
-    build: ./rest-gateway
-    container_name: api
+# rest gateways
+  api-public:
+    build: ./gate/public
+    container_name: api-public
     ports:
       - 31374:1374
     depends_on:
@@ -43,15 +46,30 @@ services:
     volumes:
       - ./volumes/shared:/usr/app/shared
     environment:
-      - NAME=rest_api_gate
+      - NAME=api_public
       - PORT=1374
       - TOKEN_SECRET=secret
       - TOEKN_TTL=4h
       - KAFKA_BROKERS=kafka:9092
       - KAFKA_CONSUMER=rest_api_gate
-  file:
-    build: ./files-repository
-    container_name: file
+  api-admin:
+    build: ./gate/admin
+    container_name: api-admin
+    ports:
+      - 31376:1376
+    depends_on:
+      - kafka
+      - redis
+    environment:
+      - NAME=api_admin
+      - PORT=1376
+      - TOKEN_SECRET=secret
+      - TOEKN_TTL=4h
+      - KAFKA_BROKERS=kafka:9092
+      - KAFKA_CONSUMER=api_admin
+  api-file:
+    build: ./gate/file-repository
+    container_name: api-file
     depends_on:
       - kafka
       - redis
@@ -60,7 +78,7 @@ services:
     volumes:
       - ./volumes/file:/usr/app/file
     environment:
-      - NAME=files
+      - NAME=api_file
       - PORT=1375
       - REDIS=redis:6379
       - KAFKA_BROKERS=kafka:9092
@@ -75,27 +93,28 @@ services:
       - AUDIO_PATH=file/audio
       - VIDEO_PATH=file/video
       - DOC_PATH=file/doc
+# micoservices
   admin:
     build: ./microservices/admin
-    container_name: admin
+    container_name: microservice-admin
     depends_on:
       - kafka
       - redis
       - mongo
     environment:
-      - NAME=admin-service
+      - NAME=microservice_admin
       - MONGO=mongodb://mongo:27017/admin
       - REDIS=redis:6379
       - KAFKA_BROKERS=kafka:9092
   note:
     build: ./microservices/note
-    container_name: note
+    container_name: microservice-note
     depends_on:
       - kafka
       - redis
       - mongo
     environment:
-      - NAME=note-service
+      - NAME=microservice-note
       - REDIS=redis:6379
       - REDIS_EXPIRETIME=5
       - MONGO=mongodb://mongo:27017/note_cms

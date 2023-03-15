@@ -1,0 +1,115 @@
+[{
+  "_id": {
+    "$oid": "640076f21ffd7ad6cb625504"
+  },
+  "id": "f95a8cc667210192",
+  "label": "پروژه ها و سورس کد",
+  "admin": 1,
+  "description": "توضیح درباره کد هایی که قبلا ایجاد کرده ام",
+  "color": "#bf5140",
+  "avatar": "abf967f473dd6dd3dde877bc2343668a.png",
+  "parent": "487df254edf343cb"
+},{
+  "_id": {
+    "$oid": "6400772b1ffd7ad6cb625506"
+  },
+  "id": "5e7552aacbbe3ec5",
+  "label": "یادداشت های آزاد",
+  "admin": 1,
+  "description": "مطالب خارج از مباحث نرم افزار",
+  "color": "#2d8680",
+  "avatar": "3e9edaa20073287737f42ee633f9ce71.png",
+  "parent": "e0f1c06efc36299d"
+},{
+  "_id": {
+    "$oid": "6400778a1ffd7ad6cb62550a"
+  },
+  "id": "e0d9defdb7cb0d94",
+  "label": "فلاتر",
+  "admin": 1,
+  "description": "مباحث مربوط به حوزه برنامه نویسی فلاتر",
+  "color": "#40a2bf",
+  "avatar": "15288c404fb7fd1207b57cbb971a93b3.png",
+  "parent": "487df254edf343cb"
+},{
+  "_id": {
+    "$oid": "640077a91ffd7ad6cb62550c"
+  },
+  "id": "dc7f88f6fec73fe4",
+  "label": "پشتیبانی و devops",
+  "admin": 1,
+  "description": "بیان تجربیات کار با docker و تکنولوژی های مختلف پشتیبانی نرم افزار",
+  "color": "#2d7d86",
+  "avatar": "373f444162a9d0075901f3e9a15d6c22.png",
+  "parent": "487df254edf343cb"
+},{
+  "_id": {
+    "$oid": "640077f11ffd7ad6cb62550e"
+  },
+  "id": "6f55af0fceabffd5",
+  "label": "مهندسی نرم افزار",
+  "admin": 1,
+  "description": "درباره انواع سبک های کد نویسی و معماری های مختلف و نرم افزار های ویژه بستر های مختلف ",
+  "color": "#2d6986",
+  "avatar": "7845f408fdf67a30f9856afb3628404d.png",
+  "parent": "487df254edf343cb"
+},{
+  "_id": {
+    "$oid": "640078191ffd7ad6cb625512"
+  },
+  "id": "0ac5ec59adedab83",
+  "label": "دنیای node js",
+  "admin": 1,
+  "description": "نوشته های مربوط به مباحث نود جی اس ، فریم ورک ها ، کتابخانه های آن ",
+  "color": "#35862d",
+  "avatar": "1e8be93cfe34e4e8372beea9e9544dea.png",
+  "parent": "487df254edf343cb"
+},{
+  "_id": {
+    "$oid": "640078551ffd7ad6cb625515"
+  },
+  "id": "90b1d846797174fa",
+  "label": "معرفی نرم افزار",
+  "admin": 1,
+  "description": "آشنایی با سیستم ها و نرم افزار های حوزه برنامه نویسی",
+  "color": "#4d1933",
+  "avatar": "e322708e13d5f1ca222cb6408e0cb870.png",
+  "parent": "487df254edf343cb"
+},{
+  "_id": {
+    "$oid": "6404fcddf5b72d473a317765"
+  },
+  "id": "e0f1c06efc36299d",
+  "label": "مطالب آزاد",
+  "admin": 1,
+  "description": "نوشته های خارج از مطالب برنامه نویسی و آزاد"
+},{
+  "_id": {
+    "$oid": "6404fd15f5b72d473a317767"
+  },
+  "id": "487df254edf343cb",
+  "label": "برنامه نویسی",
+  "admin": 1,
+  "description": "نوشته های مربوط به برنامه نویسی "
+},{
+  "_id": {
+    "$oid": "6405158af5b72d473a317774"
+  },
+  "id": "48bf4d95da4ca31f",
+  "label": "داستان",
+  "admin": 1,
+  "description": "داستان های کوتاه و آموزنده",
+  "parent": "e0f1c06efc36299d",
+  "color": "#2d5d86",
+  "avatar": "7845f408fdf67a30f9856afb3628404d.png"
+},{
+  "_id": {
+    "$oid": "64051a3ff5b72d473a317776"
+  },
+  "id": "7f266230fe77aaa6",
+  "label": "تاریخ",
+  "admin": 1,
+  "description": "نوشته هایی درباره ادوار مختلف تاریخ",
+  "parent": "e0f1c06efc36299d",
+  "color": "#4d1934"
+}]
