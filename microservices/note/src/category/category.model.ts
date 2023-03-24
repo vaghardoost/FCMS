@@ -1,9 +1,10 @@
 import { NoteModel } from '../note/note.model';
 
 export interface CategoryModel {
-  id: string;
+  _id?: string;
+  id?: string;
   label: string;
-  admin: number;
+  author: string;
   parent?: string;
   avatar?: string;
   color?: string;

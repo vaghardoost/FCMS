@@ -1,7 +1,7 @@
 export interface CreateCatDto {
   label: string;
   parent: string;
-  admin: number;
+  author: string;
   description: string;
   avatar?: string;
   color?: string;

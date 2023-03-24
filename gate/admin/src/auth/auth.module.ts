@@ -16,11 +16,11 @@ import { AuthService } from './auth.service';
         transport: Transport.KAFKA,
         options: {
           client: {
-            clientId: 'client-admin-gate',
+            clientId: configService.get<string>('NAME'),
             brokers: configService.get<string>('KAFKA_BROKERS').split(' ')
           },
           consumer: {
-            groupId: configService.get<string>('KAFKA_CONSUMER')
+            groupId: configService.get<string>('KAFKA_CONSUMER') + "-auth"
           }
         },
       }),

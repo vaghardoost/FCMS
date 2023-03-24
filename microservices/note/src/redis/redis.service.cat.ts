@@ -5,29 +5,26 @@ import { ConfigService } from "@nestjs/config"
 
 @Injectable()
 export class RedisCategoryService {
-  private readonly categoryRedisName = `${this.configService.get<string>('NAME')}_category`;
+  private readonly categoryRedisName = `${this.configService.get<string>('NAME')}.category`;
 
   constructor(
-    private connection: RedisService,
+    private readonly connection: RedisService,
     private readonly configService: ConfigService,
   ) { }
 
-  public async refreshCategories(
-    categories: CategoryModel[],
-  ): Promise<number[]> {
+  public async refresh(categories: CategoryModel[]) {
     await this.connection.redis.del(this.categoryRedisName);
-    const result: number[] = [];
     for (const cat of categories) {
-      const res = await this.setCategory(cat);
-      result.push(res);
+      const _id = cat._id;
+      delete cat._id;
+      await this.setCategory(_id, cat);
     }
-    return result;
   }
 
-  public async updateCategory(categoryModel: CategoryModel) {
-    const cat = await this.getCategory(categoryModel.id);
+  public async addOrUpdate(id: string, categoryModel: CategoryModel) {
+    const cat = await this.getCategory(id);
     const updated = { ...cat, ...categoryModel };
-    return this.setCategory(updated);
+    return this.setCategory(id, updated);
   }
 
   public async getCategory(id: string): Promise<CategoryModel> {
@@ -38,8 +35,8 @@ export class RedisCategoryService {
   public async getAllCategories(): Promise<CategoryModel[]> {
     const result: CategoryModel[] = [];
     const data = await this.connection.redis.hgetall(this.categoryRedisName);
-    for (const key in data) {
-      result.push(JSON.parse(data[key]));
+    for (const id in data) {
+      result.push({ ...JSON.parse(data[id]), id: id });
     }
     return result;
   }
@@ -48,16 +45,14 @@ export class RedisCategoryService {
     return this.connection.redis.hdel(this.categoryRedisName, id);
   }
 
-  public async setCategory(category: CategoryModel) {
+  public async setCategory(id: string, category: CategoryModel) {
     return this.connection.redis.hset(this.categoryRedisName, {
-      [category.id]: JSON.stringify(category),
+      [id]: JSON.stringify(category),
     });
   }
 
   public async addCategory(category: CategoryModel) {
-    return this.connection.redis.hset(this.categoryRedisName, {
-      [category.id]: JSON.stringify(category),
-    });
+    this.connection.redis.hset(this.categoryRedisName, { [category.id]: JSON.stringify(category) });
   }
 
   public async getCategoryList(): Promise<CategoryModel[]> {

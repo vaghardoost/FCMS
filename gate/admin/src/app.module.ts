@@ -2,14 +2,19 @@ import { MiddlewareConsumer, Inject, Module, NestModule, RequestMethod, OnModule
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ClientKafka, ClientsModule, Transport } from '@nestjs/microservices';
-import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
-import { AuthGuard } from './guard/auth.guard';
+import { AuthRoleGuard } from './auth/auth.role.guard';
 import { AuthMiddleware } from './middleware/auth.middleware';
 import { LogMiddleware } from './middleware/log.middleware';
 import { ServicesModule } from './services/services.module';
 
 @Module({
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthRoleGuard,
+    }
+  ],
   imports: [
     AuthModule,
     ServicesModule,
@@ -22,7 +27,7 @@ import { ServicesModule } from './services/services.module';
         transport: Transport.KAFKA,
         options: {
           client: {
-            clientId: 'client-admin-gate',
+            clientId: configService.get<string>('NAME'),
             brokers: configService.get<string>('KAFKA_BROKERS').split(' ')
           },
           consumer: {

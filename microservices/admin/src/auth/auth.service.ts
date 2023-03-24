@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { RedisService } from '../redis/redis.service';
 import { Code, HeaderCode, MicroserviceRes } from '../app.result';
 import { AuthDto } from './auth.dto';
 import { createHash } from 'crypto';
 import { AdminModel } from '../admin/admin.model';
+import { RedisAdminService } from 'src/redis/redis.service.admin';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly redisService: RedisService) {}
+  constructor(private readonly redisService: RedisAdminService) { }
 
   public async auth(dto: AuthDto): Promise<MicroserviceRes<AdminModel>> {
     const { username, password } = dto;
@@ -22,10 +22,7 @@ export class AuthService {
         code: result ? HeaderCode.SUCCESS : HeaderCode.NOT_EXISTS,
         payload: admin,
       },
-      response: {
-        code: Code.SignIn,
-        success: result,
-      },
+      response: { code: Code.SignIn, success: result }
     };
   }
 

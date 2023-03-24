@@ -1,4 +1,4 @@
 export interface DeleteCatDto {
   id: string;
-  user: string;
+  author: string;
 }

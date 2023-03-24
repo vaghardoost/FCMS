@@ -2,12 +2,16 @@ import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { ClientsModule, Transport } from "@nestjs/microservices";
 import { AdminController } from "./admin/admin.controller";
+import NamespaceController from "./namespace/namespace.controller";
 import { NoteController } from "./note/note.controller";
 
 @Module({
-  controllers: [NoteController, AdminController],
+  controllers: [
+    NoteController,
+    AdminController,
+    NamespaceController
+  ],
   imports: [
-    ConfigModule,
     ClientsModule.registerAsync([{
       name: "kafka-client",
       imports: [ConfigModule],
@@ -16,11 +20,11 @@ import { NoteController } from "./note/note.controller";
         transport: Transport.KAFKA,
         options: {
           client: {
-            clientId: 'client-admin-gate',
+            clientId: configService.get<string>('NAME'),
             brokers: configService.get<string>('KAFKA_BROKERS').split(' ')
           },
           consumer: {
-            groupId: configService.get<string>('KAFKA_CONSUMER') + "-microservices"
+            groupId: configService.get<string>('KAFKA_CONSUMER') + '-microservice'
           }
         },
       }),

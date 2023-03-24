@@ -9,7 +9,7 @@ import { UpdateCatDto } from './dto/update.cat.dto';
 export class CategoryController {
   constructor(private readonly service: CategoryService) {}
 
-  @MessagePattern('category-refresh')
+  @MessagePattern('category.refresh')
   public refresh() {
     return this.service.refreshRedis();
   }
@@ -19,22 +19,22 @@ export class CategoryController {
     return this.service.getCategory(dto.id);
   }
 
-  @MessagePattern('category-update')
+  @MessagePattern('category.update')
   public update(@Payload() dto: UpdateCatDto) {
     return this.service.update(dto);
   }
 
-  @MessagePattern('category-delete')
+  @MessagePattern('category.delete')
   public delete(dto: DeleteCatDto) {
     return this.service.delete(dto);
   }
 
-  @MessagePattern('category-create')
+  @MessagePattern('category.create')
   public create(@Payload() dto: CreateCatDto) {
     return this.service.create(dto);
   }
 
-  @MessagePattern('category-list')
+  @MessagePattern('category.list')
   public list() {
     return this.service.list();
   }

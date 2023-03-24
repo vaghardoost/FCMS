@@ -1,7 +1,7 @@
 version: '3'
 services:
-# ---------------------- images ----------------------
-# only redis exposed to host (for testing and a time)
+  # ---------------------- images ----------------------
+  # only redis exposed to host (for testing and a time)
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: zookeeper
@@ -32,9 +32,9 @@ services:
     container_name: redis
     ports:
       - 26379:6379
-# ---------------------- builds ----------------------
-# only API and file exposed to host
-# rest gateways
+  # ---------------------- builds ----------------------
+  # only API and file exposed to host
+  # rest gateways
   api-public:
     build: ./gate/public
     container_name: api-public
@@ -93,7 +93,7 @@ services:
       - AUDIO_PATH=file/audio
       - VIDEO_PATH=file/video
       - DOC_PATH=file/doc
-# micoservices
+  # micoservices
   admin:
     build: ./microservices/admin
     container_name: microservice-admin
@@ -106,17 +106,29 @@ services:
       - MONGO=mongodb://mongo:27017/admin
       - REDIS=redis:6379
       - KAFKA_BROKERS=kafka:9092
-  note:
-    build: ./microservices/note
-    container_name: microservice-note
+  # note:
+  #   build: ./microservices/note
+  #   container_name: microservice-note
+  #   depends_on:
+  #     - kafka
+  #     - redis
+  #     - mongo
+  #   environment:
+  #     - NAME=microservice-note
+  #     - REDIS=redis:6379
+  #     - REDIS_EXPIRETIME=5
+  #     - MONGO=mongodb://mongo:27017/note_cms
+  #     - KAFKA_BROKER=kafka:9092
+  #     - KAFKA_GROUPID=note-consumer
+  namespace:
+    build: ./microservices/namespace
+    container_name: microservice-namespace
     depends_on:
       - kafka
       - redis
       - mongo
     environment:
-      - NAME=microservice-note
+      - NAME=microservice_namespace
+      - MONGO=mongodb://mongo:27017/admin
       - REDIS=redis:6379
-      - REDIS_EXPIRETIME=5
-      - MONGO=mongodb://mongo:27017/note_cms
-      - KAFKA_BROKER=kafka:9092
-      - KAFKA_GROUPID=note-consumer
+      - KAFKA_BROKERS=kafka:9092

@@ -8,7 +8,6 @@ import { CategoryModel } from './category.model';
 import { RedisCategoryService } from '../redis/redis.service.cat';
 import { RedisNoteService } from '../redis/redis.service.note.';
 import { Code, Result, ServiceError } from '../app.result';
-import { randomBytes } from 'crypto';
 
 @Injectable()
 export class CategoryService {
@@ -21,57 +20,34 @@ export class CategoryService {
   async getCategory(id: string): Promise<Result<CategoryModel | undefined>> {
     const allNotes = await this.redisNote.getAllNotes();
     const cat = await this.redisService.getCategory(id);
-    const result: CategoryModel = {
-      ...cat,
-      notes: [],
-    };
-    for (const note of allNotes) {
-      if (note.category === id) {
-        delete note.content;
-        result.notes.push(note);
+    if (cat) {
+      const result: CategoryModel = { ...cat, notes: [] };
+      for (const note of allNotes) {
+        if (note.category === id) {
+          delete note.content;
+          result.notes.push(note);
+        }
       }
+      return this.successResult(Code.GetCategory, 'category founded', result);
     }
-    return {
-      code: Code.GetCategory,
-      message: cat ? 'category founded' : 'category note founded',
-      success: cat !== null,
-      payload: cat ? result : undefined,
-    };
+    return this.faildResult(Code.GetCategory, 'category not founds')
   }
 
   async refreshRedis(): Promise<Result<any>> {
-    const cats = await this.catModel.find<CategoryModel>({}, { _id: 0 });
-    const catList = await this.redisService.refreshCategories(cats);
-    return {
-      code: Code.RefreshRedis,
-      message: 'categories has been refreshed',
-      success: true,
-      payload: {
-        categoryList: catList,
-      },
-    };
+    const cats = await this.catModel.find<CategoryModel>({}).lean();
+    await this.redisService.refresh(cats);
+    return this.successResult(Code.RefreshRedis, 'system refresh successful')
   }
 
   async update(dto: UpdateCatDto): Promise<Result<CategoryModel>> {
     try {
-      const result = await this.catModel.findOneAndUpdate(
-        { id: dto.id },
-        { $set: dto },
-      );
+      const result: CategoryModel = await this.catModel.findOneAndUpdate<CategoryModel>({ _id: dto.id }, dto, { projection: { _id: 0 } }).lean();
       if (result) {
-        await this.redisService.updateCategory({ ...result.toJSON(), ...dto });
-        return {
-          code: Code.UpdateCategory,
-          message: 'category has been updated',
-          success: true,
-          payload: { ...result.toJSON(), ...dto },
-        };
+        const updatedResult: CategoryModel = { ...result, ...dto }
+        await this.redisService.addOrUpdate(dto.id, updatedResult);
+        return this.successResult(Code.UpdateCategory, 'update category successful', updatedResult);
       }
-      return {
-        code: Code.UpdateCategory,
-        message: 'category update failed',
-        success: false,
-      };
+      return this.faildResult(Code.UpdateCategory, 'update category failed')
     } catch (error) {
       console.error('internal error', error);
       return ServiceError;
@@ -80,34 +56,20 @@ export class CategoryService {
 
   async list(): Promise<Result<CategoryModel[]>> {
     const result = await this.redisService.getAllCategories();
-    return {
-      code: Code.ListCategory,
-      message: 'list of categories',
-      success: true,
-      payload: result,
-    };
+    return this.successResult(Code.ListCategory, 'list of categories', result);
   }
 
   async delete(dto: DeleteCatDto): Promise<Result<CategoryModel>> {
     try {
       const result = await this.catModel.findOneAndRemove({
-        id: dto.id,
-        user: dto.user,
+        _id: dto.id,
+        author: dto.author,
       });
       if (result) {
         await this.redisService.deleteCategory(dto.id);
-        return {
-          code: Code.DeleteCategory,
-          message: 'category deleted',
-          success: true,
-          payload: result,
-        };
+        return this.successResult(Code.DeleteCategory, 'category delete successful')
       }
-      return {
-        code: Code.DeleteCategory,
-        message: 'category delete failed',
-        success: false,
-      };
+      return this.faildResult(Code.DeleteCategory, 'category delete failed');
     } catch (error) {
       console.error('internal error', error);
       return ServiceError;
@@ -116,20 +78,31 @@ export class CategoryService {
 
   async create(dto: CreateCatDto): Promise<Result<CategoryModel>> {
     try {
-      const category: CategoryModel = { ...dto, id: randomBytes(8).toString('hex') };
+      const category: CategoryModel = { ...dto };
       const model = new this.catModel(category);
       const cat = await model.save();
-      await this.redisService.addCategory(cat);
-
-      return {
-        code: Code.CreateCategory,
-        message: 'category has ben created',
-        success: true,
-        payload: cat.toJSON(),
-      };
+      await this.redisService.addCategory({ ...category, id: cat._id });
+      return this.successResult(Code.CreateCategory, 'new category', { ...category, id: cat._id })
     } catch (error) {
       console.error('internal error', error);
       return ServiceError;
+    }
+  }
+
+  private successResult(code: number, message: string, payload?: any): Result<any> {
+    return {
+      code: code,
+      message: message,
+      success: true,
+      payload: payload
+    }
+  }
+
+  private faildResult(code: number, message: string): Result<any> {
+    return {
+      code: code,
+      message: message,
+      success: false
     }
   }
 }

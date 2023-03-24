@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { ClientKafka } from '@nestjs/microservices';
 import { sign } from 'jsonwebtoken';
 import { MicroserviceRes, Result, HeaderCode } from 'src/app.result';
-import { AuthDto } from './auth.dto';
+import { AuthDto } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -13,7 +13,7 @@ export class AuthService implements OnModuleInit {
   ) { }
 
   async onModuleInit() {
-    this.client.subscribeToResponseOf('admin.auth');
+    this.client.subscribeToResponseOf('admin.auth');    
   }
 
   public async auth(dto: AuthDto) {

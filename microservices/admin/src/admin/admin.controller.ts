@@ -3,13 +3,14 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AdminService } from './admin.service';
 import { AdminDto } from './dto/admin.dto';
 import { AdminCreateDto } from './dto/admin.create.dto';
+import { AdminInquiryDto } from './dto/admin.inquiry.dto';
 
 @Controller()
 export class AdminController {
-  constructor(private readonly service: AdminService) {}
+  constructor(private readonly service: AdminService) { }
 
   @MessagePattern('admin.inquiry')
-  public inquiry(@Payload() dto: AdminDto) {
+  public inquiry(@Payload() dto: AdminInquiryDto) {
     return this.service.inquiry(dto);
   }
 
@@ -27,4 +28,5 @@ export class AdminController {
   public create(@Payload() dto: AdminCreateDto) {
     return this.service.create(dto);
   }
+
 }
