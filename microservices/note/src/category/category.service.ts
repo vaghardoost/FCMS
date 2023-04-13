@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CreateCatDto } from './dto/create.cat.dto';
-import { DeleteCatDto } from './dto/delete.cat.dto';
-import { UpdateCatDto } from './dto/update.cat.dto';
+import { CreateCatDto } from './dto/category.create.dto';
+import { FindCatDto } from './dto/category.find.dto';
+import { UpdateCatDto } from './dto/category.update.dto';
 import { CategoryModel } from './category.model';
-import { RedisCategoryService } from '../redis/redis.service.cat';
-import { RedisNoteService } from '../redis/redis.service.note.';
+import { RedisCategoryService } from '../redis/category.redis.service';
+import { RedisNoteService } from '../redis/note.redis.service';
 import { Code, Result, ServiceError } from '../app.result';
 
 @Injectable()
@@ -17,9 +17,9 @@ export class CategoryService {
     private readonly redisNote: RedisNoteService,
   ) { }
 
-  async getCategory(id: string): Promise<Result<CategoryModel | undefined>> {
-    const allNotes = await this.redisNote.getAllNotes();
-    const cat = await this.redisService.getCategory(id);
+  async getCategory({ id, namespace }: FindCatDto): Promise<Result<CategoryModel | undefined>> {
+    const allNotes = await this.redisNote.getAllNotes(namespace);
+    const cat = await this.redisService.getCategory(id, namespace);
     if (cat) {
       const result: CategoryModel = { ...cat, notes: [] };
       for (const note of allNotes) {
@@ -28,7 +28,7 @@ export class CategoryService {
           result.notes.push(note);
         }
       }
-      return this.successResult(Code.GetCategory, 'category founded', result);
+      return this.successResult(Code.GetCategory, 'category data', result);
     }
     return this.faildResult(Code.GetCategory, 'category not founds')
   }
@@ -41,10 +41,10 @@ export class CategoryService {
 
   async update(dto: UpdateCatDto): Promise<Result<CategoryModel>> {
     try {
-      const result: CategoryModel = await this.catModel.findOneAndUpdate<CategoryModel>({ _id: dto.id }, dto, { projection: { _id: 0 } }).lean();
+      const result = await this.catModel.findOneAndUpdate<CategoryModel>({ _id: dto.id, namespace: dto.namespace }, dto, { new: true }).lean();
       if (result) {
         const updatedResult: CategoryModel = { ...result, ...dto }
-        await this.redisService.addOrUpdate(dto.id, updatedResult);
+        await this.redisService.setCategory(dto.id, updatedResult);
         return this.successResult(Code.UpdateCategory, 'update category successful', updatedResult);
       }
       return this.faildResult(Code.UpdateCategory, 'update category failed')
@@ -54,19 +54,19 @@ export class CategoryService {
     }
   }
 
-  async list(): Promise<Result<CategoryModel[]>> {
-    const result = await this.redisService.getAllCategories();
+  async list({ namespace }: { namespace: string }): Promise<Result<CategoryModel[]>> {
+    const result = await this.redisService.getAllCategories(namespace);
     return this.successResult(Code.ListCategory, 'list of categories', result);
   }
 
-  async delete(dto: DeleteCatDto): Promise<Result<CategoryModel>> {
+  async delete({ id, namespace }: FindCatDto): Promise<Result<CategoryModel>> {
     try {
       const result = await this.catModel.findOneAndRemove({
-        _id: dto.id,
-        author: dto.author,
+        _id: id,
+        namespace: namespace
       });
       if (result) {
-        await this.redisService.deleteCategory(dto.id);
+        await this.redisService.deleteCategory(id);
         return this.successResult(Code.DeleteCategory, 'category delete successful')
       }
       return this.faildResult(Code.DeleteCategory, 'category delete failed');
@@ -89,11 +89,11 @@ export class CategoryService {
     }
   }
 
-  private successResult(code: number, message: string, payload?: any): Result<any> {
+  private successResult(code: number, message?: string, payload?: any): Result<any> {
     return {
       code: code,
-      message: message,
       success: true,
+      message: message,
       payload: payload
     }
   }

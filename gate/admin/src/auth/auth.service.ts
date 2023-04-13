@@ -13,7 +13,7 @@ export class AuthService implements OnModuleInit {
   ) { }
 
   async onModuleInit() {
-    this.client.subscribeToResponseOf('admin.auth');    
+    this.client.subscribeToResponseOf('admin.auth');
   }
 
   public async auth(dto: AuthDto) {
@@ -25,7 +25,7 @@ export class AuthService implements OnModuleInit {
           const secret = this.configService.get<string>('TOKEN_SECRET');
           const ttl = this.configService.get<string>('TOKEN_TTL');
           const { payload } = header
-          response.payload = { token: sign({ ...payload, password: dto.password }, secret, { expiresIn: ttl || '0' }) }
+          response.payload = { token: sign({ ...payload }, secret, { expiresIn: ttl || '0' }) }
         }
         resolve(response)
       })

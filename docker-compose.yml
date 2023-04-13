@@ -106,20 +106,20 @@ services:
       - MONGO=mongodb://mongo:27017/admin
       - REDIS=redis:6379
       - KAFKA_BROKERS=kafka:9092
-  # note:
-  #   build: ./microservices/note
-  #   container_name: microservice-note
-  #   depends_on:
-  #     - kafka
-  #     - redis
-  #     - mongo
-  #   environment:
-  #     - NAME=microservice-note
-  #     - REDIS=redis:6379
-  #     - REDIS_EXPIRETIME=5
-  #     - MONGO=mongodb://mongo:27017/note_cms
-  #     - KAFKA_BROKER=kafka:9092
-  #     - KAFKA_GROUPID=note-consumer
+  note:
+    build: ./microservices/note
+    container_name: microservice-note
+    depends_on:
+      - kafka
+      - redis
+      - mongo
+    environment:
+      - NAME=microservice-note
+      - REDIS=redis:6379
+      - REDIS_EXPIRETIME=5
+      - MONGO=mongodb://mongo:27017/note_cms
+      - KAFKA_BROKER=kafka:9092
+      - KAFKA_GROUPID=note-consumer
   namespace:
     build: ./microservices/namespace
     container_name: microservice-namespace

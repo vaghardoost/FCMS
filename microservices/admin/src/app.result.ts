@@ -35,5 +35,10 @@ export enum Code {
   UpdateNamespace,
   Push,
   Pull,
-  Namespace
+  Namespace,
+  List,
+  CreateTicket,
+  CloseTicket,
+  PushTicket,
+  TicketList
 }

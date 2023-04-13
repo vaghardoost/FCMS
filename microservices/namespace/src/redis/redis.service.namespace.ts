@@ -26,7 +26,7 @@ export default class RedisNamespaceService {
 
   public async existNamespace(id: string, author: string) {
     const data = await this.service.redis.hget(this.namespaceMapName, id);
-    if (!data) {
+    if (data === null) {
       return false;
     }
     const { authors, state }: NamespaceModel = JSON.parse(data);

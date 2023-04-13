@@ -36,4 +36,15 @@ export class RedisAdminService {
     }
     return undefined;
   }
+
+  public async getList() {
+    const map = await this.service.redis.hgetall(this.adminMapName);
+    const result: AdminModel[] = [];
+    for (const key in map) {
+      const admin: AdminModel = JSON.parse(map[key]);
+      delete admin.password;
+      result.push(admin)
+    }
+    return result;
+  }
 }

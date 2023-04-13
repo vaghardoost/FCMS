@@ -1,7 +1,7 @@
 export interface Result<T> {
   code: Code;
-  message: string;
   success: boolean;
+  message?: string;
   payload?: T;
 }
 

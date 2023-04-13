@@ -1,4 +1,4 @@
-import { Controller, OnModuleInit, Inject,Get,UseGuards,SetMetadata, Request, Post, Body, ValidationPipe, Patch, Param } from "@nestjs/common";
+import { Controller, OnModuleInit, Put, Inject, Get, UseGuards, SetMetadata, Request, Post, Body, ValidationPipe, Param } from "@nestjs/common";
 import { ClientKafka } from "@nestjs/microservices";
 import { Role } from "src/app.roles";
 import { AuthGuard } from "src/auth/auth.guard";
@@ -6,7 +6,10 @@ import NamespaceAuthorDto from "./dto/namespace.author.dto";
 import NamespaceCreateDto from "./dto/namespace.create.dto";
 import NamespaceStateDto from "./dto/namespace.state.dto";
 import NamespaceUpdateDto from "./dto/namespace.update.dto";
-import { NamespaceGuard } from "./namespace.guard";
+import { NamespaceGuard } from "./guards/namespace.guard";
+import NamespaceIncludeDto from "./dto/namespace.include.dto";
+import { ValidationPipeId } from "../services.pipe";
+import NamespaceThemeDto from "./dto/namespace.theme.dto";
 
 @Controller('namespace')
 export default class NamespaceController implements OnModuleInit {
@@ -21,6 +24,9 @@ export default class NamespaceController implements OnModuleInit {
     this.client.subscribeToResponseOf("namespace.push");
     this.client.subscribeToResponseOf("namespace.pull");
     this.client.subscribeToResponseOf("namespace.get");
+    this.client.subscribeToResponseOf("namespace.list");
+    this.client.subscribeToResponseOf("namespace.include");
+    this.client.subscribeToResponseOf("namespace.theme");
   }
 
   @Get()
@@ -30,7 +36,7 @@ export default class NamespaceController implements OnModuleInit {
     return this.client.send("namespace.get", { id: req.user.id })
   }
 
-  @Post()
+  @Put()
   @UseGuards(AuthGuard)
   @SetMetadata("role", [Role.Manager, Role.Operator])
   public createNamespace(@Body(ValidationPipe) dto: NamespaceCreateDto, @Request() req: any) {
@@ -44,14 +50,30 @@ export default class NamespaceController implements OnModuleInit {
     return this.client.send("namespace.state", dto)
   }
 
-  @Patch("reload")
+  @Post("include")
+  @UseGuards(AuthGuard)
+  @SetMetadata("role", [Role.Manager, Role.Operator])
+  public include(@Body(ValidationPipe) dto: NamespaceIncludeDto) {
+    return this.client.send("namespace.include", dto)
+  }
+
+
+  @Post("reload")
   @UseGuards(AuthGuard)
   @SetMetadata("role", [Role.Manager, Role.Operator])
   public reloadNamespace() {
     return this.client.send("namespace.reload", {})
   }
 
-  @Patch(":id")
+  @Get("list")
+  @UseGuards(AuthGuard)
+  @SetMetadata("role", [Role.Manager, Role.Operator])
+  public list() {
+    return this.client.send("namespace.list", {})
+  }
+
+
+  @Post(":id")
   @UseGuards(AuthGuard, NamespaceGuard)
   @SetMetadata("role", [Role.Admin])
   public updateNamespace(@Param("id") id: string, @Body(ValidationPipe) dto: NamespaceUpdateDto) {
@@ -71,4 +93,12 @@ export default class NamespaceController implements OnModuleInit {
   public pushAuthor(@Body(ValidationPipe) dto: NamespaceAuthorDto, @Param("id") id: string) {
     return this.client.send("namespace.push", { ...dto, id: id });
   }
+
+  @Post(":id/theme")
+  @UseGuards(AuthGuard)
+  @SetMetadata("role", [Role.Operator, Role.Manager])
+  public setTheme(@Body(ValidationPipe) dto: NamespaceThemeDto, @Param("id", ValidationPipeId) id: string) {
+    return this.client.send("namespace.theme", { ...dto, id: id });
+  }
+
 }

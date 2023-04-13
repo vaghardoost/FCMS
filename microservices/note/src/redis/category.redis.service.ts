@@ -21,22 +21,23 @@ export class RedisCategoryService {
     }
   }
 
-  public async addOrUpdate(id: string, categoryModel: CategoryModel) {
-    const cat = await this.getCategory(id);
-    const updated = { ...cat, ...categoryModel };
-    return this.setCategory(id, updated);
-  }
-
-  public async getCategory(id: string): Promise<CategoryModel> {
+  public async getCategory(id: string, namespace: string): Promise<CategoryModel | null> {
     const raw = await this.connection.redis.hget(this.categoryRedisName, id);
-    return JSON.parse(raw);
+    if (raw) {
+      const data: CategoryModel = { ...JSON.parse(raw), id: id };
+      return (data.namespace === namespace) ? data : null
+    }
+    return null;
   }
 
-  public async getAllCategories(): Promise<CategoryModel[]> {
+  public async getAllCategories(namespace: string): Promise<CategoryModel[]> {
     const result: CategoryModel[] = [];
     const data = await this.connection.redis.hgetall(this.categoryRedisName);
     for (const id in data) {
-      result.push({ ...JSON.parse(data[id]), id: id });
+      const category: CategoryModel = { ...JSON.parse(data[id]), id: id };
+      if (category.namespace === namespace) {
+        result.push(category);
+      }
     }
     return result;
   }
@@ -46,6 +47,7 @@ export class RedisCategoryService {
   }
 
   public async setCategory(id: string, category: CategoryModel) {
+    delete category['_id'];
     return this.connection.redis.hset(this.categoryRedisName, {
       [id]: JSON.stringify(category),
     });

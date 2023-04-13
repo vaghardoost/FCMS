@@ -12,32 +12,38 @@ export class RedisNoteService {
     private configService: ConfigService
   ) { }
 
-  public async addOrUpdate(id: string, note: NoteModel) {
-    await this.putOnRedis(id, note);
+  public async setNote(id: string, note: NoteModel) {
+    delete note['_id'];
+    await this.saveExpireable(id, note);
     delete note.content;
     await this.connection.redis.hset(this.redisNoteName, {
       [id]: JSON.stringify(note),
     });
   }
 
-  public async putOnRedis(id: string, note: NoteModel): Promise<void> {
+  public async saveExpireable(id: string, note: NoteModel): Promise<void> {
+    delete note['_id'];
     await this.connection.redis.set(id, JSON.stringify(note));
     await this.connection.redis.expire(id, this.configService.get<number>('REDIS_EXPIRETIME', 0) * 60);
   }
 
-  public async getNote(id: string): Promise<NoteModel | null> {
-    const data = await this.connection.redis.get(id);
-    return data
-      ? { ...JSON.parse(data), id: id }
-      : null
+  public async getNote(id: string, namespace: string): Promise<NoteModel | null> {
+    const raw = await this.connection.redis.get(id);
+    if (raw) {
+      const data: NoteModel = { ...JSON.parse(raw), id: id };
+      return (data.namespace === namespace) ? data : null
+    }
+    return null;
   }
 
-  public async getAllNotes(): Promise<NoteModel[]> {
+  public async getAllNotes(namespace: string): Promise<NoteModel[]> {
     const redisResult = await this.connection.redis.hgetall(this.redisNoteName);
     const result: NoteModel[] = [];
     for (const id in redisResult) {
-      const note: NoteModel = JSON.parse(redisResult[id]);
-      result.push({ ...note, id: id });
+      const note: NoteModel = { ...JSON.parse(redisResult[id]), id: id };
+      if (note.namespace === namespace) {
+        result.push(note);
+      }
     }
     return result;
   }
@@ -47,7 +53,7 @@ export class RedisNoteService {
     for (const note of noteList) {
       const _id = note._id;
       delete note._id;
-      await this.addOrUpdate(_id, note);
+      await this.setNote(_id, note);
     }
   }
 

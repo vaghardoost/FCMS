@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { RedisService } from './redis.service';
-import { RedisNoteService } from './redis.service.note.';
-import { RedisCategoryService } from './redis.service.cat';
+import { RedisNoteService } from './note.redis.service';
+import { RedisCategoryService } from './category.redis.service';
 import { ConfigModule } from "@nestjs/config"
 
 @Module({

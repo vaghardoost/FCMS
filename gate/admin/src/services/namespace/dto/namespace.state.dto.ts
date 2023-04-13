@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsString, Matches } from "class-validator";
 
 export enum NamespaceState {
   Run = 'Run',
@@ -9,6 +9,7 @@ export enum NamespaceState {
 export default class NamespaceStateDto {
   @IsString()
   @IsNotEmpty()
+  @Matches(/^[0-9a-fA-F]{24}$/, { message: 'author is not valid for id pattern' })
   public id: string;
 
   @IsEnum(NamespaceState)

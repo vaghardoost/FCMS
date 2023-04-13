@@ -8,11 +8,15 @@ import { Code, HeaderCode, MicroserviceRes, Result } from "src/app.result";
 import NamespaceStateDto from "./dto/namespace.state.dto";
 import NamespaceUpdateDto from "./dto/namespace.update.dto";
 import NamespaceAuthorDto from "./dto/namespace.author.dto";
-import { NamespaceInquiryDto } from "./dto/namespace.inquiry.dto";
+import NamespaceInquiryDto from "./dto/namespace.inquiry.dto";
 import RedisNamespaceService from "src/redis/redis.service.namespace";
+import NamespaceIncludeDto from "./dto/namespace.include.dto";
+import { NamespaceType } from "./namespace.enum";
+import NamespaceThemeDto from "./dto/namespace.theme.dto";
 
 @Injectable()
 export default class NamespaceService implements OnModuleInit {
+
   constructor(
     @InjectModel('Namespace') private namespaceModel: Model<NamespaceModel>,
     private readonly redis: RedisNamespaceService
@@ -20,17 +24,22 @@ export default class NamespaceService implements OnModuleInit {
 
   async onModuleInit() { await this.reload() }
 
+  public async setInclude(dto: NamespaceIncludeDto) {
+    const result = await this.namespaceModel.findOneAndUpdate<NamespaceModel>({ _id: dto.id }, { $set: { ...dto } }, { new: true }).lean();
+    this.redis.setNamespace(dto.id, result);
+    return this.successResult(Code.NamespaceInclude);
+  }
+
   public async get({ id }: { id: string }) {
     const list = await this.redis.allNamespaces();
     const result = [];
-
     for (const key in list) {
       const item: NamespaceModel = JSON.parse(list[key]);
       if (item.authors.includes(id)) {
         result.push({ ...item, id: key });
       }
     }
-    return this.successResult(Code.Namespace, result);
+    return this.successResult(Code.GetNamespace, result);
   }
 
   public async pull({ author, id }: NamespaceAuthorDto) {
@@ -61,17 +70,18 @@ export default class NamespaceService implements OnModuleInit {
       secoundColor: '#FFFFFF',
       authors: [dto.admin],
       state: NamespaceState.Suspend,
+      include: [NamespaceType.Blog]
     }
     const model = new this.namespaceModel<NamespaceModel>(nsmodel);
     const { _id } = await model.save();
     this.redis.setNamespace(_id.toString(), nsmodel);
-    return this.successResult(Code.Register, nsmodel);
+    return this.successResult(Code.RegisterNamespace, nsmodel);
   }
 
   public async setState({ id, state }: NamespaceStateDto) {
     const result = await this.namespaceModel.findOneAndUpdate<NamespaceModel>({ _id: id }, { $set: { state: state } }, { new: true }).lean();
     this.redis.setNamespace(id, result);
-    return this.successResult(Code.State, result);
+    return this.successResult(Code.StateNamespace, result);
   }
 
   public async reload() {
@@ -82,6 +92,24 @@ export default class NamespaceService implements OnModuleInit {
       this.redis.setNamespace(_id.toString(), item);
     }
     return this.successResult(Code.Reload);
+  }
+
+  public async list() {
+    const list = await this.redis.allNamespaces();
+    const result = []
+    for (const id in list) {
+      const item = { id: id, ...JSON.parse(list[id]) };
+      result.push(item);
+    }
+    return this.successResult(Code.NamespaceList, result);
+  }
+
+  public async theme({ id, theme }: NamespaceThemeDto) {
+    this.namespaceModel.findOneAndUpdate({ _id: id }, { $set: { theme: theme } });
+    const namesapce = await this.redis.getNamespace(id);
+    const new_namespace = { ...namesapce, theme: theme };
+    this.redis.setNamespace(id, new_namespace);
+    return this.successResult(Code.NamespaceTheme, new_namespace);
   }
 
   public async inquiry({ id, author }: NamespaceInquiryDto): Promise<MicroserviceRes<any>> {
@@ -96,6 +124,7 @@ export default class NamespaceService implements OnModuleInit {
       }
     }
   }
+
 
   private successResult(code: number, payload?: any): Result<any> {
     return {

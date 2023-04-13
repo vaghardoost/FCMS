@@ -1,22 +1,22 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CategoryService } from './category.service';
-import { CreateCatDto } from './dto/create.cat.dto';
-import { DeleteCatDto } from './dto/delete.cat.dto';
-import { UpdateCatDto } from './dto/update.cat.dto';
+import { CreateCatDto } from './dto/category.create.dto';
+import { FindCatDto } from './dto/category.find.dto';
+import { UpdateCatDto } from './dto/category.update.dto';
 
 @Controller()
 export class CategoryController {
-  constructor(private readonly service: CategoryService) {}
+  constructor(private readonly service: CategoryService) { }
 
   @MessagePattern('category.refresh')
   public refresh() {
     return this.service.refreshRedis();
   }
 
-  @MessagePattern('category')
-  public get(@Payload() dto: { id: string }) {
-    return this.service.getCategory(dto.id);
+  @MessagePattern('category.get')
+  public get(@Payload() dto: FindCatDto) {
+    return this.service.getCategory(dto);
   }
 
   @MessagePattern('category.update')
@@ -25,7 +25,7 @@ export class CategoryController {
   }
 
   @MessagePattern('category.delete')
-  public delete(dto: DeleteCatDto) {
+  public delete(dto: FindCatDto) {
     return this.service.delete(dto);
   }
 
@@ -35,7 +35,7 @@ export class CategoryController {
   }
 
   @MessagePattern('category.list')
-  public list() {
-    return this.service.list();
+  public list(@Payload() dto: { namespace: string }) {
+    return this.service.list(dto);
   }
 }

@@ -70,6 +70,10 @@ export class AdminService implements OnModuleInit {
       : this.faildResult(Code.Inquiry)
   }
 
+  public async list() {
+    return this.successResult(Code.List, await this.redis.getList());
+  }
+
   private successResult(code: number, payload?: any): Result<any> {
     return {
       code: code,

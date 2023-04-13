@@ -6,5 +6,6 @@ export interface NoteModel {
   content?: Array<any>;
   tag: Array<string>;
   category?: string;
-  admin: number;
+  author: string;
+  namespace: string;
 }

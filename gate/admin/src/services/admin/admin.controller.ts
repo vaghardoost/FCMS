@@ -4,11 +4,10 @@ import { ClientKafka, Payload } from "@nestjs/microservices";
 import { AuthGuard } from "src/auth/auth.guard";
 import { AdminCreateDto } from "./dto/admin.create.dto";
 import { AdminAuthDto } from "./dto/admin.auth.dto";
-import NamespaceAuthorDto from "../namespace/dto/namespace.author.dto";
 import { AdminInquiryDto } from "./dto/admin.inquiry.dto";
 
 @Controller("admin")
-export class AdminController implements OnModuleInit {
+export default class AdminController implements OnModuleInit {
 
   constructor(@Inject("kafka-client") private readonly client: ClientKafka) { }
 
@@ -18,6 +17,7 @@ export class AdminController implements OnModuleInit {
     this.client.subscribeToResponseOf("admin.setup");
     this.client.subscribeToResponseOf("admin.getme");
     this.client.subscribeToResponseOf('admin.inquiry');
+    this.client.subscribeToResponseOf('admin.list');
   }
 
   @Patch("reload")
@@ -38,6 +38,14 @@ export class AdminController implements OnModuleInit {
   public inquiry(@Payload() inquiry: AdminInquiryDto) {
     return this.client.send("admin.inquiry", inquiry);
   }
+
+  @Get("list")
+  @UseGuards(AuthGuard)
+  @SetMetadata("role", [Role.Manager, Role.Operator])
+  public list() {
+    return this.client.send("admin.list", {});
+  }
+
 
   @Post()
   @UseGuards(AuthGuard)

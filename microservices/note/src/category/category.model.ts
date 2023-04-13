@@ -10,4 +10,5 @@ export interface CategoryModel {
   color?: string;
   description: string;
   notes?: NoteModel[];
+  namespace: string;
 }

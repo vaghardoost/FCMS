@@ -23,17 +23,22 @@ export enum HeaderCode {
   CONFLICT,
 }
 
-// microservice code = 1000
+// microservice code = 500
 
 export enum Code {
-  Reload = 101,
+  Reload = 501,
   Inquiry,
-  Create,
-  SignIn,
-  Register,
-  State,
+  RegisterNamespace,
+  StateNamespace,
   UpdateNamespace,
   Push,
   Pull,
-  Namespace
+  GetNamespace,
+  NamespaceInclude,
+  NamespaceList,
+  NamespaceTheme,
+  InsertTheme,
+  UpdateTheme,
+  DeleteTheme,
+  ThemeList,
 }

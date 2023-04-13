@@ -1,13 +1,18 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { NamespaceType } from "../namespace.enum";
 
 export default class NamespaceCreateDto {
-  // admin of namespace
   @IsString()
   @IsNotEmpty()
   admin: string;
 
-  // name of namespace
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @IsArray()
+  @IsEnum(NamespaceType)
+  @IsOptional()
+  public include: string
+
 }

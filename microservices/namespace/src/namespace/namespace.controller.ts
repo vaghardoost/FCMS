@@ -1,11 +1,13 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import NamespaceCreateDto from './dto/namespace.create.dto';
-import { NamespaceInquiryDto } from './dto/namespace.inquiry.dto';
+import NamespaceInquiryDto from './dto/namespace.inquiry.dto';
 import NamespaceAuthorDto from './dto/namespace.author.dto';
 import NamespaceStateDto from './dto/namespace.state.dto';
 import NamespaceUpdateDto from './dto/namespace.update.dto';
 import NamespaceService from './namespace.service';
+import NamespaceIncludeDto from './dto/namespace.include.dto';
+import NamespaceThemeDto from './dto/namespace.theme.dto';
 
 @Controller()
 export default class NamespaceController {
@@ -25,6 +27,11 @@ export default class NamespaceController {
   @MessagePattern('namespace.state')
   public setState(@Payload() dto: NamespaceStateDto) {
     return this.service.setState(dto);
+  }
+
+  @MessagePattern('namespace.include')
+  public setInclude(@Payload() dto: NamespaceIncludeDto) {
+    return this.service.setInclude(dto);
   }
 
   @MessagePattern('namespace.reload')
@@ -50,6 +57,16 @@ export default class NamespaceController {
   @MessagePattern('namespace.get')
   public get(@Payload() dto: { id: string }) {
     return this.service.get(dto);
+  }
+
+  @MessagePattern('namespace.theme')
+  public theme(@Payload() dto: NamespaceThemeDto) {
+    return this.service.theme(dto);
+  }
+
+  @MessagePattern('namespace.list')
+  public list() {
+    return this.service.list();
   }
 
 }

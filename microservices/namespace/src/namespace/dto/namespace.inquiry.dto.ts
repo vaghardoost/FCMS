@@ -1,4 +1,4 @@
-export interface NamespaceInquiryDto {
+export default interface NamespaceInquiryDto {
   id: string,
   author: string
 }

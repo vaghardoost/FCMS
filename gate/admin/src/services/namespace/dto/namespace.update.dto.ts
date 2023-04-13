@@ -12,4 +12,5 @@ export default class NamespaceUpdateDto {
   @IsOptional()
   @IsString()
   public secoundColor: string
+  
 }

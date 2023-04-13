@@ -29,4 +29,9 @@ export class AdminController {
     return this.service.create(dto);
   }
 
+  @MessagePattern('admin.list')
+  public list() {
+    return this.service.list();
+  }
+
 }

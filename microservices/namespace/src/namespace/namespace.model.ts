@@ -1,3 +1,4 @@
+import { NamespaceType } from "src/namespace/namespace.enum";
 import { NamespaceState } from "./namespace.state";
 
 export default class NamespaceModel {
@@ -7,5 +8,7 @@ export default class NamespaceModel {
   secoundColor: String;
   founder: String;
   authors: String[];
+  include: NamespaceType[];
   state: NamespaceState;
+  theme?: string;
 }

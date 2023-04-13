@@ -1,4 +1,4 @@
-import { Controller, UseFilters, UseGuards } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { NoteService } from './note.service';
 import { NoteFindDto } from './dto/note.find.dto';
@@ -9,20 +9,20 @@ import { NoteCreateDto } from './dto/note.create.dto';
 @Controller()
 export class NoteController {
   constructor(private readonly service: NoteService) { }
+  
+  @MessagePattern('note.get')
+  public get(@Payload() data: NoteFindDto) {
+    return this.service.get(data);
+  }
 
   @MessagePattern('note.list')
-  public list() {
-    return this.service.list();
+  public list(@Payload() data: { namespace: string }) {
+    return this.service.list(data);
   }
 
   @MessagePattern('note.create')
   public create(@Payload() data: NoteCreateDto) {
     return this.service.create(data);
-  }
-
-  @MessagePattern('note')
-  public get(@Payload() data: NoteFindDto) {
-    return this.service.get(data.id);
   }
 
   @MessagePattern('note.refresh')

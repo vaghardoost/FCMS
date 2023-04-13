@@ -2,11 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
 import { NoteModel } from './note.model';
-import { RedisNoteService } from '../redis/redis.service.note.';
+import { RedisNoteService } from '../redis/note.redis.service';
 import { NoteUpdateDto } from './dto/note.update.dto';
 import { Code, Result, ServiceError } from '../app.result';
 import { NoteCreateDto } from './dto/note.create.dto';
 import { NoteDeleteDto } from './dto/note.delete.dto';
+import { NoteFindDto } from './dto/note.find.dto';
 
 @Injectable()
 export class NoteService {
@@ -26,7 +27,7 @@ export class NoteService {
     try {
       const model = new this.noteModel(note);
       await model.save();
-      await this.redisService.addOrUpdate(model._id.toString(), note);
+      await this.redisService.setNote(model._id.toString(), note);
       return this.successResult(Code.CreateNote, 'new note', { note, id: model._id });
     } catch (error) {
       console.error('internal error', error);
@@ -34,21 +35,21 @@ export class NoteService {
     }
   }
 
-  async list(): Promise<Result<NoteModel[]>> {
-    const result = await this.redisService.getAllNotes();
+  async list({ namespace }: { namespace: string }): Promise<Result<NoteModel[]>> {
+    const result = await this.redisService.getAllNotes(namespace);
     return this.successResult(Code.NoteList, 'note list', result);
   }
 
-  async get(id: string): Promise<Result<any>> {
+  async get({ id, namespace }: NoteFindDto): Promise<Result<any>> {
     try {
-      const redisResult = await this.redisService.getNote(id);
+      const redisResult = await this.redisService.getNote(id, namespace);
       if (redisResult) {
         return this.successResult(Code.GetNote, 'note founded', redisResult);
       }
-      const mongoResult = await this.noteModel.findById<NoteModel>({ _id: id }, { _id: 0 }).lean();
+      const mongoResult = await this.noteModel.findById<NoteModel>({ _id: id, namespace: namespace }).lean();
       if (mongoResult) {
-        await this.redisService.putOnRedis(id, mongoResult);
-        const redisResult = await this.redisService.getNote(id);
+        await this.redisService.saveExpireable(id, mongoResult);
+        const redisResult = await this.redisService.getNote(id, namespace);
         return this.successResult(Code.GetNote, 'note founded', redisResult);
       }
       return this.faildResult(Code.GetNote, 'note not founded')
@@ -60,11 +61,10 @@ export class NoteService {
 
   async update(dto: NoteUpdateDto): Promise<Result<NoteModel>> {
     try {
-      const result: NoteModel = await this.noteModel.findOneAndUpdate<NoteModel>({ _id: dto.id }, dto, { projection: { _id: 0 } }).lean();
+      const result: NoteModel = await this.noteModel.findOneAndUpdate<NoteModel>({ _id: dto.id, namespace: dto.namespace }, dto, { new: true }).lean();
       if (result) {
-        const updatedResult: NoteModel = { ...result, ...dto };
-        await this.redisService.addOrUpdate(dto.id, updatedResult);
-        return this.successResult(Code.NoteUpdate, 'successful update', updatedResult);
+        this.redisService.setNote(dto.id, result);
+        return this.successResult(Code.NoteUpdate, 'successful update', result);
       }
       return this.faildResult(Code.NoteUpdate, 'failed update');
     } catch (error) {
@@ -73,11 +73,11 @@ export class NoteService {
     }
   }
 
-  async delete(dto: NoteDeleteDto): Promise<Result<NoteModel>> {
+  async delete({ id, namespace }: NoteDeleteDto): Promise<Result<NoteModel>> {
     try {
-      const result = await this.noteModel.findOneAndDelete({ _id: dto.id }, { projection: { _id: 0 } }).lean();
+      const result = await this.noteModel.findOneAndDelete({ _id: id, namespace: namespace }, { new: true }).lean();
       if (result) {
-        await this.redisService.deleteNote(dto.id);
+        this.redisService.deleteNote(id);
         return this.successResult(Code.NoteDelete, 'note deleted', result);
       }
       return this.faildResult(Code.NoteDelete, 'delete note failed');

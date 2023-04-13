@@ -7,7 +7,8 @@ export const CategorySchema = new Schema(
     description: { type: String, required: true },
     parent: { type: String },
     color: { type: String },
-    avatar: { type: String }
+    avatar: { type: String },
+    namespace: { type: String },
   },
   { versionKey: false },
 );
