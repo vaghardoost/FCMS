@@ -18,24 +18,25 @@ export class AudioService {
     @InjectModel('file') private readonly model: Model<FileModel>,
   ) { }
 
-  public async upload(audios: Express.Multer.File[], admin: number): Promise<Result<FileModel[]>> {
+  public async upload(audios: Express.Multer.File[], admin: string, namespace: string): Promise<Result<FileModel[]>> {
     const result = [];
     for (const audio of audios) {
-      const { buffer, mimetype } = audio;
-      const postfix = mimetype.split('/')[1];
-      const name = Date.now().toString() + '.' + postfix;
-      const path = this.configService.get<string>('AUDIO_PATH') + '/' + name;
-      writeFileSync(path, buffer);
+      const { buffer, mimetype, filename } = audio;
+      const postfix = filename.split('.').at(-1);
       const fileData: FileModel = {
-        path: path,
         demo: '',
-        id: `${randomBytes(16).toString('hex')}.${postfix}`,
         admin: admin,
-        postfix: mimetype,
+        postfix: postfix,
+        mimetype: mimetype,
         type: 'audio',
+        namespace: namespace,
       };
       const model = new this.model(fileData);
-      await model.save();
+      const saved = await model.save();
+      fileData.id = saved._id.toString();
+      const path = `${this.configService.get<string>('AUDIO_PATH')}/${fileData.id}.${fileData.postfix}`;
+      writeFileSync(path, buffer);
+
       await this.redisService.save(fileData);
       result.push(fileData);
     }

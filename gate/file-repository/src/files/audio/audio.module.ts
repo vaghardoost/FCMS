@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from "@nestjs/config"
 import { RedisModule } from 'src/redis/redis.module';
 import { FileSchema } from 'src/app.schema';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   controllers: [AudioController],
@@ -31,6 +32,9 @@ import { FileSchema } from 'src/app.schema';
         }),
       },
     ]),
+    MulterModule.register({
+      dest: '/audio'
+    })
   ],
 })
 export class AudioModule { }

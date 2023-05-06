@@ -6,6 +6,7 @@ import { CreateNoteDto } from "./dto/note.create.dto";
 import { AuthGuard } from "src/auth/auth.guard";
 import { Role } from "../../app.roles";
 import { ValidationPipeId } from "../services.pipe";
+import { NamespaceGuard } from "../namespace/guards/namespace.guard";
 
 @Controller("note")
 export default class NoteController implements OnModuleInit {
@@ -29,8 +30,8 @@ export default class NoteController implements OnModuleInit {
   }
 
   @Delete(':namespace')
+  @UseGuards(AuthGuard, NamespaceGuard)
   @SetMetadata("role", [Role.Admin, Role.Author])
-  @UseGuards(AuthGuard)
   public async delete(
     @Param('namespace', ValidationPipeId) namespace: string,
     @Body(ValidationPipe) { id }: DeleteNoteDto) {
@@ -38,8 +39,8 @@ export default class NoteController implements OnModuleInit {
   }
 
   @Put(':namespace')
+  @UseGuards(AuthGuard, NamespaceGuard)
   @SetMetadata("role", [Role.Admin, Role.Author])
-  @UseGuards(AuthGuard)
   public async create(
     @Param('namespace', ValidationPipeId) namespace: string,
     @Body(ValidationPipe) dto: CreateNoteDto,
@@ -61,8 +62,8 @@ export default class NoteController implements OnModuleInit {
   }
 
   @Post(":namespace/:id")
+  @UseGuards(AuthGuard, NamespaceGuard)
   @SetMetadata("role", [Role.Admin, Role.Author])
-  @UseGuards(AuthGuard)
   public async update(
     @Body(ValidationPipe) dto: UpdateNoteDto,
     @Param('namespace', ValidationPipeId) namespace: string,

@@ -1,8 +1,8 @@
-import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { Matches, IsArray, IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { NamespaceType } from "../namespace.enum";
 
 export default class NamespaceCreateDto {
-  @IsString()
+  @Matches(/^[0-9a-fA-F]{24}$/, { message: 'admin id is not valid for id pattern' })
   @IsNotEmpty()
   admin: string;
 
@@ -13,6 +13,6 @@ export default class NamespaceCreateDto {
   @IsArray()
   @IsEnum(NamespaceType)
   @IsOptional()
-  public include: string
+  public include: NamespaceType
 
 }

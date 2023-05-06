@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { Matches, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class UpdateCatDto {
     @IsString()
@@ -7,6 +7,7 @@ export class UpdateCatDto {
 
     @IsString()
     @IsOptional()
+    @Matches(/^[0-9a-fA-F]{24}$/, { message: 'category id is not valid for id pattern' })
     public parent: string
 
     @IsString()

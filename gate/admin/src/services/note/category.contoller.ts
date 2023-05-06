@@ -34,7 +34,7 @@ export default class CategoryController implements OnModuleInit {
   @UseGuards(AuthGuard)
   @SetMetadata("role", [Role.Author, Role.Admin])
   public async update_category(
-    @QueryRequired('namespace') namespace: string,
+    @Param('namespace', ValidationPipeId) namespace: string,
     @Param('id', ValidationPipeId) id: string,
     @Body(ValidationPipe) dto: UpdateCatDto) {
     return this.client.send("category.update", { ...dto, id: id, namespace: namespace });
@@ -58,7 +58,7 @@ export default class CategoryController implements OnModuleInit {
   @UseGuards(AuthGuard, NamespaceGuard)
   @SetMetadata("role", [Role.Author, Role.Admin])
   public async create_category(
-    @Param('namespace', ValidationPipeId) namespace: string,
+    @Param('namespace') namespace: string,
     @Body(ValidationPipe) dto: CreateCatDto,
     @Request() request: any) {
     return this.client.send("category.create", { ...dto, author: request.user.id, namespace: namespace });

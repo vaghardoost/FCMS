@@ -1,8 +1,9 @@
 export interface FileModel {
-  id: string;
-  path: string;
-  demo: string;
+  id?: string;
+  demo?: string;
   postfix: string;
-  admin: number;
+  mimetype: string;
+  namespace: string;
+  admin: string;
   type: 'photo' | 'video' | 'audio' | 'doc';
 }
