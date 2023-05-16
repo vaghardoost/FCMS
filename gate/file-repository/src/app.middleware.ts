@@ -3,7 +3,7 @@ import { ConfigService } from "@nestjs/config"
 import { verify } from 'jsonwebtoken';
 
 @Injectable()
-export class AuthMiddleware implements NestMiddleware {
+export default class AuthMiddleware implements NestMiddleware {
   constructor(private readonly configService: ConfigService) { }
 
   use(req: any, res: any, next: (error?: any) => void) {

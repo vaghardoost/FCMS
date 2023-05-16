@@ -4,14 +4,12 @@ import { VideoService } from './video.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from "@nestjs/config"
-import { RedisModule } from 'src/redis/redis.module';
 import { FileSchema } from 'src/app.schema';
 
 @Module({
   controllers: [VideoController],
   providers: [VideoService],
   imports: [
-    RedisModule,
     MongooseModule.forFeature([{ name: 'file', schema: FileSchema }]),
     ClientsModule.registerAsync([
       {
@@ -32,4 +30,4 @@ import { FileSchema } from 'src/app.schema';
     ]),
   ],
 })
-export class VideoModule { }
+export default class VideoModule { }

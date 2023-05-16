@@ -4,14 +4,12 @@ import { PhotoService } from './photo.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { MongooseModule } from '@nestjs/mongoose';
 import { FileSchema } from '../../app.schema';
-import { RedisModule } from '../../redis/redis.module';
 import { ConfigModule, ConfigService } from "@nestjs/config"
 
 @Module({
   controllers: [PhotoController],
   providers: [PhotoService],
   imports: [
-    RedisModule,
     ConfigModule,
     MongooseModule.forFeature([{ name: 'file', schema: FileSchema }]),
     ClientsModule.registerAsync([
@@ -33,4 +31,4 @@ import { ConfigModule, ConfigService } from "@nestjs/config"
     ]),
   ],
 })
-export class PhotoModule { }
+export default class PhotoModule { }

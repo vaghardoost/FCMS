@@ -1,9 +1,7 @@
 import { Schema } from 'mongoose';
 export const FileSchema = new Schema({
-  id: { type: String, required: true },
-  path: { type: String, required: true },
-  demo: { type: String, required: true },
   type: { type: String, required: true },
   postfix: { type: String, required: true },
-  admin: { type: Number, required: true },
+  admin: { type: String, required: true },
+  namespace: { type: String, required: true }
 });

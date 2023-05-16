@@ -1,103 +1,78 @@
-import { HttpException, HttpStatus, Injectable, StreamableFile } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createReadStream, readdirSync, writeFileSync } from 'fs';
-import { randomBytes } from 'crypto';
+import { readdirSync, statSync, unlinkSync, writeFileSync } from 'fs';
 import { Model } from 'mongoose';
 
 import { InjectModel } from '@nestjs/mongoose';
 import { join } from 'path';
-import { RedisAudioService } from 'src/redis/service/redis.audio.service';
 import { FileModel } from 'src/app.file.model';
 import { Code, Result } from 'src/app.result';
 
 @Injectable()
 export class AudioService {
+  private readonly directory:string = this.configService.get<string>('AUDIO_PATH');
+
   constructor(
     private readonly configService: ConfigService,
-    private readonly redisService: RedisAudioService,
     @InjectModel('file') private readonly model: Model<FileModel>,
   ) { }
 
-  public async upload(audios: Express.Multer.File[], admin: string, namespace: string): Promise<Result<FileModel[]>> {
+  public async upload(
+    list: Express.Multer.File[],
+    admin: string,
+    namespace: string
+  ): Promise<Result<FileModel[]>> {
     const result = [];
-    for (const audio of audios) {
-      const { buffer, mimetype, filename } = audio;
-      const postfix = filename.split('.').at(-1);
+    
+    for (const file of list) {
+      const { buffer, mimetype, originalname } = file;
+      const postfix = originalname.split('.').at(-1);
+
       const fileData: FileModel = {
-        demo: '',
         admin: admin,
         postfix: postfix,
         mimetype: mimetype,
         type: 'audio',
         namespace: namespace,
       };
-      const model = new this.model(fileData);
-      const saved = await model.save();
-      fileData.id = saved._id.toString();
-      const path = `${this.configService.get<string>('AUDIO_PATH')}/${fileData.id}.${fileData.postfix}`;
-      writeFileSync(path, buffer);
 
-      await this.redisService.save(fileData);
+      const model = new this.model(fileData);
+      const save = await model.save();
+      fileData.id = save._id.toString();
+
+      const path = `file/${namespace}/${this.directory}/${fileData.id}.${fileData.postfix}`;
+      writeFileSync(path, buffer, {});
       result.push(fileData);
     }
     return { code: Code.Upload, success: true, payload: result };
   }
 
-  public async get(id: string) {
-    const result = await this.redisService.get(id);
-    if (result) {
-      const file = createReadStream(join(result.path));
-      return new StreamableFile(file, { type: result.postfix });
-    }
-    throw new HttpException(
-      { statusCode: 400, message: 'file token is invalid' },
-      HttpStatus.BAD_REQUEST,
-    );
-  }
-
-  public async list(): Promise<Result<FileModel[]>> {
-    const list = await this.redisService.list();
-    return {
-      code: Code.GetList,
-      success: true,
-      payload: list,
-    };
-  }
-
-  public async reload(): Promise<Result<any>> {
-    await this.redisService.clear();
-    const result = await this.model.find({ type: 'audio' });
-    for (const photo of result) {
-      await this.redisService.save(photo.toJSON());
-    }
-    return { code: Code.Reload, success: true };
-  }
-
-  public async delete(id: string): Promise<Result<any>> {
-    const file = await this.model.findOneAndDelete<FileModel>({ id: id });
-    await this.reload();
-    return {
-      code: Code.Delete,
-      success: true,
-      payload: file
+  public async list(namespace: string): Promise<Result<any>> {
+    try {
+      const path = join('file', namespace, this.directory)
+      const files = readdirSync(path)
+      let size = 0;
+      files.forEach(file => size += statSync(join(path, file)).size);
+      return {
+        code: Code.GetList, success: true,
+        payload: { size: size, files: files }
+      };
+    } catch {
+      return { code: Code.GetList, success: false };
     }
   }
 
-  public async refreshStorage(): Promise<Result<string[]>> {
-    await this.reload();
-    const listResult: string[] = [];
-    const path = this.configService.get<string>('AUDIO_PATH');
-    const pathList = readdirSync(path);
-
-    for (const filePath of pathList) {
-      const result = await this.redisService.existsPath(path + "/" + filePath);
-      if (!result) listResult.push(filePath);
+  public async delete(namespace: string, filename: string): Promise<Result<any>> {
+    const id = filename.split('.')[0];
+    const file = await this.model.findOneAndDelete<FileModel>({ _id: id });
+    if (file) {
+      const path = `/${namespace}/${this.directory}/${filename}`;
+      const demo = `/${namespace}/${this.directory}/demo.${filename}`;
+      unlinkSync(path)
+      unlinkSync(demo)
+      return { code: Code.Delete, success: true, payload: file }
     }
-
-    return {
-      code: Code.Storage,
-      success: true,
-      payload: listResult
-    }
+    return { code: Code.Delete, success: false }
   }
+
 }

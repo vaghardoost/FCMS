@@ -27,7 +27,7 @@ export class PhotoPipe implements PipeTransform {
         )
       ) {
         throw new HttpException(
-          { statusCode: 400, message: 'file type error' },
+          { statusCode: 400, message: 'file type error', payload: { mimetype: mimetype } },
           HttpStatus.BAD_REQUEST,
         );
       }

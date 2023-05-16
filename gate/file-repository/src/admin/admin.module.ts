@@ -1,12 +1,16 @@
-import { Module } from '@nestjs/common';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { AuthGuard } from './auth.guard';
-import { ConfigModule, ConfigService } from "@nestjs/config"
+import { Module } from "@nestjs/common";
+import AdminController from "./admin.controller";
+import AdminService from "./admin.service";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import AuthModule from "src/auth/auth.module";
+import { ClientsModule, Transport } from "@nestjs/microservices";
 
 @Module({
+  controllers: [AdminController],
+  providers: [AdminService],
   imports: [
+    ConfigModule,
+    AuthModule,
     ClientsModule.registerAsync([
       {
         name: 'kafka-client',
@@ -24,9 +28,6 @@ import { ConfigModule, ConfigService } from "@nestjs/config"
         }),
       }
     ]),
-  ],
-  providers: [AuthService, AuthGuard],
-  exports: [AuthGuard],
-  controllers: [AuthController],
+  ]
 })
-export default class AuthModule { }
+export default class AdminModule { }

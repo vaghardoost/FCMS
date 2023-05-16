@@ -24,13 +24,13 @@ export enum HeaderCode {
 }
 
 // microservice code = 100
+
 export enum Code {
-  Reload = 101,
-  Create,
+  Create = 101,
   SignIn,
   Upload,
   Delete,
   GetList,
   Storage,
-
+  CreateNamespace
 }

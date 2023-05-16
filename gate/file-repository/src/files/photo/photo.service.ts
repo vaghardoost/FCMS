@@ -1,117 +1,86 @@
-import { HttpException, HttpStatus, Injectable, StreamableFile } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { read as jimpRead } from "jimp"
 import { ConfigService } from '@nestjs/config';
-import { createReadStream, readdirSync } from 'fs';
-import { randomBytes } from 'crypto';
+import { readdirSync, writeFileSync, unlinkSync, statSync } from 'fs';
 import { Model } from 'mongoose';
 import { FileModel } from '../../app.file.model';
-import { RedisPhotoService } from '../../redis/service/redis.photo.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { Code, Result } from '../../app.result';
 import { join } from 'path';
-import { writeFile } from 'fs/promises';
 
 @Injectable()
 export class PhotoService {
+
+  private readonly directory:string = this.configService.get<string>('PHOTO_PATH');
+
   constructor(
     private readonly configService: ConfigService,
-    private readonly redisService: RedisPhotoService,
-    @InjectModel('file') private readonly model: Model<FileModel>,
+    @InjectModel('file') private readonly model: Model<FileModel>
   ) { }
 
   public async upload(
-    photos: Express.Multer.File[],
-    admin: number,
+    list: Express.Multer.File[],
+    admin: string,
+    namespace: string
   ): Promise<Result<FileModel[]>> {
     const result = [];
-    for (const photo of photos) {
-      const { buffer, mimetype } = photo;
-      const postfix = mimetype.split('/')[1];
-      const name = Date.now().toString() + '.' + postfix;
-      const path = this.configService.get<string>('PHOTO_PATH') + '/' + name;
-      const demoPath = this.configService.get<string>('PHOTO_PATH') + '/demo.' + name;
-
-      writeFile(path, buffer);
-
-      jimpRead(buffer, (err, image) => {
-        if (err) return console.error('error to read uploaded buffer at:', name);
-        const width = (image.getWidth() > 100) ? image.getWidth() / 10 : image.getWidth()
-        const height = (image.getHeight() > 100) ? image.getHeight() / 10 : image.getHeight()
-        image.resize(width, height).quality(30).write(demoPath);
-      })
+    
+    for (const file of list) {
+      const { buffer, mimetype, originalname } = file;
+      const postfix = originalname.split('.').at(-1);
 
       const fileData: FileModel = {
-        path: path,
-        demo: demoPath,
-        id: `${randomBytes(16).toString('hex')}.${postfix}`,
         admin: admin,
-        postfix: mimetype,
+        postfix: postfix,
+        mimetype: mimetype,
         type: 'photo',
+        namespace: namespace,
       };
 
       const model = new this.model(fileData);
-      model.save();
-      this.redisService.save(fileData);
+      const save = await model.save();
+      fileData.id = save._id.toString();
+
+      const path = `file/${namespace}/${this.directory}/${fileData.id}.${fileData.postfix}`;
+      writeFileSync(path, buffer, {});
+      jimpRead(buffer, (err, image) => {
+        if (err) return console.error('error to read uploaded buffer at:', err);
+        const width = (image.getWidth() > 100) ? image.getWidth() / 10 : image.getWidth()
+        const height = (image.getHeight() > 100) ? image.getHeight() / 10 : image.getHeight()
+        const path_demo = `file/${namespace}/${this.directory}/demo.${fileData.id}.${fileData.postfix}`;
+        image.resize(width, height).quality(30).write(path_demo);
+      });
       result.push(fileData);
     }
     return { code: Code.Upload, success: true, payload: result };
   }
 
-  public async get(id: string, options?: { demo?: boolean }) {
-    const result = await this.redisService.get(id);
-    if (result) {
-      const file = createReadStream(join((options?.demo) ? result.demo : result.path));
-      return new StreamableFile(file, { type: result.postfix });
-    }
-    throw new HttpException(
-      { statusCode: 400, message: 'file token is invalid' },
-      HttpStatus.BAD_REQUEST,
-    );
-  }
-
-  public async list(): Promise<Result<FileModel[]>> {
-    const list = await this.redisService.list();
-    return {
-      code: Code.GetList,
-      success: true,
-      payload: list,
-    };
-  }
-
-  public async reload(): Promise<Result<any>> {
-    await this.redisService.clear();
-    const result = await this.model.find({ type: 'photo' });
-    for (const photo of result) {
-      await this.redisService.save(photo.toJSON());
-    }
-    return { code: Code.Reload, success: true };
-  }
-
-  public async delete(id: string): Promise<Result<any>> {
-    const file = await this.model.findOneAndDelete<FileModel>({ id: id });
-    await this.reload();
-    return {
-      code: Code.Delete,
-      success: true,
-      payload: file
+  public async list(namespace: string): Promise<Result<any>> {
+    try {
+      const path = join('file', namespace, this.directory)
+      const files = readdirSync(path)
+      let size = 0;
+      files.forEach(file => size += statSync(join(path, file)).size);
+      return {
+        code: Code.GetList, success: true,
+        payload: { size: size, files: files }
+      };
+    } catch {
+      return { code: Code.GetList, success: false };
     }
   }
 
-  public async refreshStorage(): Promise<Result<string[]>> {
-    await this.reload();
-    const path = this.configService.get<string>('PHOTO_PATH');
-    const listResult: string[] = [];
-    const pathList = readdirSync(path);
-
-    for (const filePath of pathList) {
-      const result = await this.redisService.existsPath(path + "/" + filePath);
-      if (!result) listResult.push(filePath);
+  public async delete(namespace: string, filename: string): Promise<Result<any>> {
+    const id = filename.split('.')[0];
+    const file = await this.model.findOneAndDelete<FileModel>({ _id: id });
+    if (file) {
+      const path = `/${namespace}/${this.directory}/${filename}`;
+      const demo = `/${namespace}/${this.directory}/demo.${filename}`;
+      unlinkSync(path)
+      unlinkSync(demo)
+      return { code: Code.Delete, success: true, payload: file }
     }
-
-    return {
-      code: Code.Storage,
-      success: true,
-      payload: listResult
-    }
+    return { code: Code.Delete, success: false }
   }
+
 }

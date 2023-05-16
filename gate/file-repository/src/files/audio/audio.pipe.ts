@@ -28,7 +28,7 @@ export class AudioPipe implements PipeTransform {
       }
       if (!this.configService.get<string>('AUDIO_ACCEPT').split(' ').includes(mimetype)) {
         throw new HttpException(
-          { statusCode: 400, message: 'file type error' },
+          { statusCode: 400, message: 'file type error', payload: { mimetype: mimetype } },
           HttpStatus.BAD_REQUEST,
         );
       }

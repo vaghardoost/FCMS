@@ -6,7 +6,7 @@ import { AuthService } from 'src/auth/auth.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { AuthController } from 'src/auth/auth.controller';
 import { FileSchema } from 'src/app.schema';
-import { RedisModule } from 'src/redis/redis.module';
+
 
 @Module({
   imports: [
@@ -14,7 +14,7 @@ import { RedisModule } from 'src/redis/redis.module';
     ClientsModule.registerAsync([
       {
         name: 'kafka-client',
-        imports: [ConfigModule, RedisModule],
+        imports: [ConfigModule],
         inject: [ConfigService],
         useFactory: (configService: ConfigService) => ({
           transport: Transport.KAFKA,
@@ -33,4 +33,4 @@ import { RedisModule } from 'src/redis/redis.module';
   exports: [AuthGuard],
   controllers: [AuthController],
 })
-export class DocModule { }
+export default class DocModule { }

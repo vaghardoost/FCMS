@@ -3,43 +3,35 @@ import { VideoPipe } from './video.pipe';
 import { VideoService } from './video.service';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { NamespaceGuard } from 'src/guard/namespace.guard';
+import { ValidationPipeId } from 'src/guard/validation.pipe';
 
 @Controller('video')
 export class VideoController {
   constructor(private readonly service: VideoService) { }
 
-  @Post('upload')
-  @UseGuards(AuthGuard)
+  @Get(':namespace')
+  list(@Param('namespace', ValidationPipeId) namespace: string) {
+    return this.service.list(namespace);
+  }
+
+  @Delete(':namespace/:id')
+  @UseGuards(AuthGuard, NamespaceGuard)
+  delete(
+    @Param('namespace') namespace: string,
+    @Param('id') id: string,
+  ) {
+    return this.service.delete(namespace, id);
+  }
+
+  @Post(':namespace')
+  @UseGuards(AuthGuard, NamespaceGuard)
   @UseInterceptors(AnyFilesInterceptor())
-  upload(@UploadedFiles(VideoPipe) photos: Express.Multer.File[], @Req() req: any) {
-    return this.service.upload(photos, req.user.id);
-  }
-
-  @Get('list')
-  list() {
-    return this.service.list();
-  }
-
-  @Get('storage')
-  @UseGuards(AuthGuard)
-  storage() {
-    return this.service.refreshStorage();
-  }
-
-  @Get(':id')
-  download(@Param('id') id: string) {
-    return this.service.get(id);
-  }
-
-  @Post('reload')
-  @UseGuards(AuthGuard)
-  reload() {
-    return this.service.reload();
-  }
-
-  @Delete(':id')
-  @UseGuards(AuthGuard)
-  delete(@Param('id') id: string) {
-    return this.service.delete(id);
+  upload(
+    @UploadedFiles(VideoPipe) photos: Express.Multer.File[],
+    @Req() req: any,
+    @Param('namespace') namespace: string
+  ) {
+    return this.service.upload(photos, req.user.id, namespace);
   }
 }

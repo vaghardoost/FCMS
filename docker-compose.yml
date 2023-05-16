@@ -72,7 +72,6 @@ services:
     container_name: api-file
     depends_on:
       - kafka
-      - redis
     ports:
       - 31375:1375
     volumes:
@@ -80,7 +79,6 @@ services:
     environment:
       - NAME=api_file
       - PORT=1375
-      - REDIS=redis:6379
       - KAFKA_BROKERS=kafka:9092
       - TOKEN_SECRET=secret
       - TOKEN_TTL=4h
@@ -89,11 +87,7 @@ services:
       - VIDEO_MAXSIZE=100 MB
       - AUDIO_MAXSIZE=20 MB
       - DOC_MAXSIZE=200 MB
-      - PHOTO_PATH=file/photo
-      - AUDIO_PATH=file/audio
-      - VIDEO_PATH=file/video
-      - DOC_PATH=file/doc
-  # micoservices
+  # ------------------ microservices -------------------
   admin:
     build: ./microservices/admin
     container_name: microservice-admin

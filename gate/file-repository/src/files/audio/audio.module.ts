@@ -4,15 +4,12 @@ import { AudioService } from './audio.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from "@nestjs/config"
-import { RedisModule } from 'src/redis/redis.module';
 import { FileSchema } from 'src/app.schema';
-import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   controllers: [AudioController],
   providers: [AudioService],
   imports: [
-    RedisModule,
     ConfigModule,
     MongooseModule.forFeature([{ name: 'file', schema: FileSchema }]),
     ClientsModule.registerAsync([
@@ -32,9 +29,6 @@ import { MulterModule } from '@nestjs/platform-express';
         }),
       },
     ]),
-    MulterModule.register({
-      dest: '/audio'
-    })
   ],
 })
-export class AudioModule { }
+export default class AudioModule { }
