@@ -19,6 +19,12 @@ export enum Code {
   ListCategory,
   UpdateCategory,
   DeleteCategory,
+  CreateDatapack,
+  GetDatapack,
+  NamespaceDatapack,
+  DatapackList,
+  UpdateDatapack,
+  DeleteDatapack
 }
 
 export const ServiceError = { code:0,success:false,message:'service internal error' };

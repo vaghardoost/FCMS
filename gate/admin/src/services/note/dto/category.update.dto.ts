@@ -20,5 +20,5 @@ export class UpdateCatDto {
 
     @IsString()
     @IsOptional()
-    public avarat?: string;
+    public avatar?: string;
 }

@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Inject, OnModuleInit,HttpStatus,HttpException } from "@nestjs/common";
+import { CanActivate, ExecutionContext, Inject, OnModuleInit, HttpStatus, HttpException } from "@nestjs/common";
 import { ClientKafka } from "@nestjs/microservices";
 import { HeaderCode, MicroserviceRes } from "src/app.result";
 
@@ -10,7 +10,9 @@ export class NamespaceGuard implements CanActivate, OnModuleInit {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const { id } = context.switchToHttp().getRequest().params;
+    const id =
+      context.switchToHttp().getRequest().params.namespace ??
+      context.switchToHttp().getRequest().params.id
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
       throw new HttpException('namespace id is invalid', HttpStatus.BAD_REQUEST);
     }

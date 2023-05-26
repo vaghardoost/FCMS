@@ -1,16 +1,17 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { ClientsModule, Transport } from "@nestjs/microservices";
-import  AdminController from "./admin/admin.controller";
+import AdminController from "./admin/admin.controller";
 import NamespaceController from "./namespace/namespace.controller";
-import NoteController  from "./note/note.controller";
+import NoteController from "./note/note.controller";
 import ThemeController from "./namespace/theme.controller";
 import TicketController from "./admin/ticket.controller";
 import CategoryController from "./note/category.contoller";
+import DatapackController from "./note/datapack.controller";
 
 @Module({
   controllers: [
-    NoteController, CategoryController,
+    NoteController, CategoryController, DatapackController,
     AdminController, TicketController,
     NamespaceController, ThemeController,
   ],

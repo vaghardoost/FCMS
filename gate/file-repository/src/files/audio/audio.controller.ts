@@ -25,6 +25,12 @@ export class AudioController {
     return this.service.list(namespace);
   }
 
+  @Get(':namespace/data')
+  @UseGuards(AuthGuard, NamespaceGuard)
+  dataList(@Param('namespace', ValidationPipeId) namespace: string) {
+    return this.service.databaseList(namespace);
+  }
+
   @Delete(':namespace/:id')
   @UseGuards(AuthGuard, NamespaceGuard)
   delete(

@@ -2,7 +2,6 @@ import { Body, Param, Request, Get, ValidationPipe, Put, Delete, Controller, Inj
 import { ClientKafka } from "@nestjs/microservices";
 import { Role } from "src/app.roles";
 import { AuthGuard } from "src/auth/auth.guard";
-import { QueryRequired } from "../services.param";
 import { ValidationPipeId } from "../services.pipe";
 import { UpdateCatDto } from "./dto/category.update.dto";
 import { NamespaceGuard } from "../namespace/guards/namespace.guard";
@@ -41,7 +40,6 @@ export default class CategoryController implements OnModuleInit {
   }
 
   @Get(":namespace/:id")
-  @UseGuards(NamespaceGuard)
   public async get_category(
     @Param('namespace', ValidationPipeId) namespace: string,
     @Param('id', ValidationPipeId) id: string) {

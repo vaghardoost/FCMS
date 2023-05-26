@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { readdirSync, statSync, unlinkSync, writeFileSync } from 'fs';
+import { existsSync, readdirSync, statSync, unlinkSync, writeFileSync } from 'fs';
 import { Model } from 'mongoose';
 
 import { InjectModel } from '@nestjs/mongoose';
@@ -10,7 +10,7 @@ import { Code, Result } from 'src/app.result';
 
 @Injectable()
 export class AudioService {
-  private readonly directory:string = this.configService.get<string>('AUDIO_PATH');
+  private readonly directory: string = this.configService.get<string>('AUDIO_PATH');
 
   constructor(
     private readonly configService: ConfigService,
@@ -23,7 +23,7 @@ export class AudioService {
     namespace: string
   ): Promise<Result<FileModel[]>> {
     const result = [];
-    
+
     for (const file of list) {
       const { buffer, mimetype, originalname } = file;
       const postfix = originalname.split('.').at(-1);
@@ -47,6 +47,11 @@ export class AudioService {
     return { code: Code.Upload, success: true, payload: result };
   }
 
+  public async databaseList(namespace: string): Promise<Result<any>> {
+    const result = await this.model.find<FileModel>({ namespace: namespace, type: 'photo' }, { __v: 0 });
+    return { code: Code.GetList, success: true, payload: result };
+  }
+
   public async list(namespace: string): Promise<Result<any>> {
     try {
       const path = join('file', namespace, this.directory)
@@ -63,16 +68,13 @@ export class AudioService {
   }
 
   public async delete(namespace: string, filename: string): Promise<Result<any>> {
-    const id = filename.split('.')[0];
-    const file = await this.model.findOneAndDelete<FileModel>({ _id: id });
-    if (file) {
-      const path = `/${namespace}/${this.directory}/${filename}`;
-      const demo = `/${namespace}/${this.directory}/demo.${filename}`;
-      unlinkSync(path)
-      unlinkSync(demo)
-      return { code: Code.Delete, success: true, payload: file }
+    const path = `file/${namespace}/${this.directory}/${filename}`;
+    if (existsSync(path)) {
+      unlinkSync(path);
     }
-    return { code: Code.Delete, success: false }
+    const id = filename.split('.')[0];
+    const file = await this.model.findOneAndDelete<FileModel>({ _id: id, namespace: namespace });
+    return { code: Code.Delete, success: true, payload: file };
   }
 
 }
