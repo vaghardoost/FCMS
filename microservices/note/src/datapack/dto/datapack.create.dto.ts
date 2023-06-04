@@ -1,5 +1,6 @@
 export default interface DatapackCreateDto {
   namespace: string
-  content: Array<any>
   author: string
+  content: Array<any>
+  env?: any
 }

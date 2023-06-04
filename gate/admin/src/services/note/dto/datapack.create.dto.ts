@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty } from "class-validator";
+import { IsArray, IsNotEmpty, IsOptional } from "class-validator";
 
 export default class DatapackCreateDTO {
 
@@ -6,8 +6,7 @@ export default class DatapackCreateDTO {
   @IsNotEmpty()
   public content: Array<any>
 
-  @IsArray()
-  @IsNotEmpty()
-  public bottomsheet: Array<any>
-
+  @IsOptional()
+  env: any
 }
+

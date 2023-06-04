@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from "class-validator"
+import { IsOptional, IsString, Matches } from "class-validator"
 
 export default class NamespaceUpdateDto {
   @IsString()
@@ -12,5 +12,10 @@ export default class NamespaceUpdateDto {
   @IsOptional()
   @IsString()
   public secoundColor: string
+
+  @Matches(/^[0-9a-fA-F]{24}$/, { message: 'admin id is not valid for id pattern' })
+  @IsOptional()
+  public datapack: string
+
   
 }

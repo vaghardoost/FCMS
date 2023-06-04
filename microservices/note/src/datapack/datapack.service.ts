@@ -1,11 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { Model } from 'mongoose';
+import { InjectModel } from "@nestjs/mongoose";
+
 import DatapackCreateDto from "./dto/datapack.create.dto";
 import DatapackNamespaceDto from "./dto/datapack.namespace.dto";
 import DatapackUpdateDto from "./dto/datapack.update.dto";
 import DatapackDeleteDto from "./dto/datapack.delete.dto";
 import { RedisDatapackService } from "src/redis/datapack.redis.service";
-import { InjectModel } from "@nestjs/mongoose";
 import DatapackGetDto from "./dto/datapack.get.dto";
 import { Code, Result } from "src/app.result";
 import DatapackModel from "./datapack.model";
@@ -43,7 +44,7 @@ export class DatapackService {
     for (const key in list) {
       const item: DatapackModel = JSON.parse(list[key]);
       if (item.namespace === dto.namespace) {
-        delete item.bottomsheet;
+        delete item.env;
         delete item.content;
         result.push(item)
       }
@@ -79,7 +80,7 @@ export class DatapackService {
     const list = await this.redis.all();
     for (const key in list) {
       const item: DatapackModel = JSON.parse(list[key]);
-      delete item.bottomsheet;
+      delete item.env;
       delete item.content;
       result.push(item);
     }

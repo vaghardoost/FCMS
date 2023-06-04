@@ -11,6 +11,7 @@ export default new Schema(
     primaryColor: { type: String, required: true },
     secoundColor: { type: String, required: true },
     theme: { type: String },
+    datapack: { type: String },
   },
   {
     versionKey: false,

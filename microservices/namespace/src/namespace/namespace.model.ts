@@ -11,4 +11,5 @@ export default class NamespaceModel {
   include: NamespaceType[];
   state: NamespaceState;
   theme?: string;
+  datapack?: string;
 }

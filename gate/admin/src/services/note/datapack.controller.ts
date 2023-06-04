@@ -19,7 +19,6 @@ export default class DatapackController implements OnModuleInit {
     this.client.subscribeToResponseOf("datapack.get");
     this.client.subscribeToResponseOf("datapack.namespace");
     this.client.subscribeToResponseOf("datapack.reload");
-
     this.client.subscribeToResponseOf("datapack.update");
   }
 
@@ -31,7 +30,7 @@ export default class DatapackController implements OnModuleInit {
     @Body(ValidationPipe) dto: DatapackCreateDTO,
     @Param('namespace', ValidationPipeId) namespace: string,
   ) {
-    return this.client.send('datapack.create', { ...dto, namespace: namespace, author: req.user.id });
+    return this.client.send('datapack.create', { namespace: namespace, author: req.user.id, ...dto })
   }
 
   @Get()

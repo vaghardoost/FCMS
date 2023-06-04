@@ -14,5 +14,9 @@ export default class NamespaceCreateDto {
   @IsEnum(NamespaceType)
   @IsOptional()
   public include: NamespaceType
+  
+  @Matches(/^[0-9a-fA-F]{24}$/, { message: 'admin id is not valid for id pattern' })
+  @IsOptional()
+  public datapack: string
 
 }
