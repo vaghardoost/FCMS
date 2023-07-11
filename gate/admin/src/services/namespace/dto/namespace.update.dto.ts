@@ -18,4 +18,8 @@ export default class NamespaceUpdateDto {
   public datapack: string
 
   
+  @IsString()
+  @IsOptional()
+  avatar: string;
+  
 }

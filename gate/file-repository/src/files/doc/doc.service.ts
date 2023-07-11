@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { existsSync, readdirSync, statSync, unlinkSync, writeFileSync } from 'fs';
+import { existsSync, readdirSync, statSync, unlinkSync, writeFileSync, mkdirSync } from 'fs';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { join } from 'path';
@@ -9,7 +9,7 @@ import { Code, Result } from 'src/app.result';
 
 @Injectable()
 export class DocService {
-  private readonly directory:string = this.configService.get<string>('DOC_PATH');
+  private readonly directory: string = this.configService.get<string>('DOC_PATH');
 
   constructor(
     private readonly configService: ConfigService,
@@ -22,9 +22,8 @@ export class DocService {
     namespace: string
   ): Promise<Result<FileModel[]>> {
     const result = [];
-    
-    for (const file of list) {
-      const { buffer, mimetype, originalname } = file;
+
+    for (const { buffer, mimetype, originalname } of list) {
       const postfix = originalname.split('.').at(-1);
 
       const fileData: FileModel = {
@@ -39,7 +38,15 @@ export class DocService {
       const save = await model.save();
       fileData.id = save._id.toString();
 
-      const path = `file/${namespace}/${this.directory}/${fileData.id}.${fileData.postfix}`;
+      const dir = `file/${namespace}/${this.directory}`;
+      const filename = `${fileData.id}.${fileData.postfix}`;
+
+      if (!existsSync(dir)) {
+        mkdirSync(dir, { recursive: true });
+      }
+
+      const path = `${dir}/${filename}`;
+
       writeFileSync(path, buffer, {});
       result.push(fileData);
     }

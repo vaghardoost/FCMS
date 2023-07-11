@@ -10,6 +10,10 @@ export default class NamespaceCreateDto {
   @IsNotEmpty()
   name: string;
 
+  @IsString()
+  @IsOptional()
+  avatar: string;
+
   @IsArray()
   @IsEnum(NamespaceType)
   @IsOptional()

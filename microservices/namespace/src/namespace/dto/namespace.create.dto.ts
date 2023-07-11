@@ -6,5 +6,6 @@ export default interface NamespaceCreateDto {
   name: string;
   datapack: string;
   base: NamespaceType;
+  avatar: string;
   include: NamespaceType[];
 }

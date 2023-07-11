@@ -7,6 +7,7 @@ import { RedisService } from "./redis.service";
 export default class RedisNamespaceService {
 
   private readonly namespaceMapName = `namespace.map`;
+  private readonly namespaceSpecialMapName = `namespace.special.map`;
 
   constructor(private readonly service: RedisService) { }
 
@@ -34,6 +35,21 @@ export default class RedisNamespaceService {
   }
 
   public async clearNamespace() {
-    this.service.redis.del(this.namespaceMapName);
+    await this.service.redis.del(this.namespaceMapName);
+    await this.service.redis.del(this.namespaceSpecialMapName);
+  }
+
+  public async setSpecial(name: string, id: string) {
+    this.service.redis.hset(this.namespaceSpecialMapName, name, id);
+  }
+
+  public async getSpecial(name: string) {
+    const data = await this.service.redis.hget(this.namespaceSpecialMapName, name);
+    if (data === null) {
+      return undefined;
+    }
+    const id = await this.service.redis.hget(this.namespaceSpecialMapName, name);
+    const namespace = await this.getNamespace(id);
+    return namespace;
   }
 }

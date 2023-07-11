@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { read as jimpRead } from "jimp"
 import { ConfigService } from '@nestjs/config';
-import { readdirSync, writeFileSync, unlinkSync, statSync, existsSync } from 'fs';
+import { readdirSync, writeFileSync, unlinkSync, statSync, existsSync, mkdirSync } from 'fs';
 import { Model } from 'mongoose';
 import { FileModel } from '../../app.file.model';
 import { InjectModel } from '@nestjs/mongoose';
@@ -27,8 +27,7 @@ export class PhotoService {
   ): Promise<Result<FileModel[]>> {
     const result = [];
 
-    for (const file of list) {
-      const { buffer, mimetype, originalname } = file;
+    for (const { buffer, mimetype, originalname } of list) {
       const postfix = originalname.split('.').at(-1);
 
       const fileData: FileModel = {
@@ -43,7 +42,15 @@ export class PhotoService {
       const save = await model.save();
       fileData.id = save._id.toString();
 
-      const path = `file/${namespace}/${this.directory}/${fileData.id}.${fileData.postfix}`;
+      const dir = `file/${namespace}/${this.directory}`;
+      const filename = `${fileData.id}.${fileData.postfix}`;
+
+      if (!existsSync(dir)) {
+        mkdirSync(dir, { recursive: true });
+      }
+
+      const path = `${dir}/${filename}`;
+
       writeFileSync(path, buffer, {});
       jimpRead(buffer, (err, image) => {
         if (err) return console.error('error to read uploaded buffer at:', err);

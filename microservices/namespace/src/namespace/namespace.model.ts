@@ -12,4 +12,5 @@ export default class NamespaceModel {
   state: NamespaceState;
   theme?: string;
   datapack?: string;
+  avatar?: string;
 }

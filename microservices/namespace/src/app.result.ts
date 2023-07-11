@@ -41,4 +41,6 @@ export enum Code {
   UpdateTheme,
   DeleteTheme,
   ThemeList,
+  SetSpecial,
+  GetSpecial
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { existsSync, readdirSync, statSync, unlinkSync, writeFileSync } from 'fs';
+import { existsSync, readdirSync, statSync, unlinkSync, writeFileSync, mkdirSync } from 'fs';
 import { Model } from 'mongoose';
 
 import { InjectModel } from '@nestjs/mongoose';
@@ -24,8 +24,7 @@ export class AudioService {
   ): Promise<Result<FileModel[]>> {
     const result = [];
 
-    for (const file of list) {
-      const { buffer, mimetype, originalname } = file;
+    for (const { buffer, mimetype, originalname } of list) {
       const postfix = originalname.split('.').at(-1);
 
       const fileData: FileModel = {
@@ -40,7 +39,16 @@ export class AudioService {
       const save = await model.save();
       fileData.id = save._id.toString();
 
-      const path = `file/${namespace}/${this.directory}/${fileData.id}.${fileData.postfix}`;
+
+      const dir = `file/${namespace}/${this.directory}`;
+      const filename = `${fileData.id}.${fileData.postfix}`;
+
+      if (!existsSync(dir)) {
+        mkdirSync(dir, { recursive: true });
+      }
+
+      const path = `${dir}/${filename}`;
+
       writeFileSync(path, buffer, {});
       result.push(fileData);
     }

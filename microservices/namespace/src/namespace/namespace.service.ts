@@ -13,12 +13,16 @@ import RedisNamespaceService from "src/redis/redis.service.namespace";
 import NamespaceIncludeDto from "./dto/namespace.include.dto";
 import { NamespaceType } from "./namespace.enum";
 import NamespaceThemeDto from "./dto/namespace.theme.dto";
+import NamespaceSpecialGetDto from "./dto/namespace.special.get.dto";
+import NamespaceSpecialSetDto from "./dto/namespace.special.set.dto";
+import NamespaceSpecialModel from "./namespace.special.model";
 
 @Injectable()
 export default class NamespaceService implements OnModuleInit {
 
   constructor(
     @InjectModel('Namespace') private namespaceModel: Model<NamespaceModel>,
+    @InjectModel('NamespaceSpecial') private namespaceSpecialModel: Model<NamespaceSpecialModel>,
     private readonly redis: RedisNamespaceService
   ) { }
 
@@ -70,7 +74,7 @@ export default class NamespaceService implements OnModuleInit {
       secoundColor: '#FFFFFF',
       authors: [dto.admin],
       state: NamespaceState.Suspend,
-      include: [NamespaceType.Blog]
+      include: [NamespaceType.Blog],
     }
     const model = new this.namespaceModel<NamespaceModel>(nsmodel);
     const { _id } = await model.save();
@@ -86,11 +90,18 @@ export default class NamespaceService implements OnModuleInit {
 
   public async reload() {
     const result = await this.namespaceModel.find<NamespaceModel>({}).lean();
-    this.redis.clearNamespace();
+    await this.redis.clearNamespace();
     for (const item of result) {
       const _id = item._id;
       this.redis.setNamespace(_id.toString(), item);
     }
+
+    const sResult = await this.namespaceSpecialModel.find({}).lean();
+    for (const item of sResult) {
+      const { id, name } = item;
+      this.redis.setSpecial(name, id);
+    }
+
     return this.successResult(Code.Reload);
   }
 
@@ -112,6 +123,23 @@ export default class NamespaceService implements OnModuleInit {
     return this.successResult(Code.NamespaceTheme, new_namespace);
   }
 
+  public async getSpecial(dto: NamespaceSpecialGetDto) {
+    const result = await this.redis.getSpecial(dto.name);
+    return (result)
+      ? this.successResult(Code.GetSpecial, result)
+      : this.faildResult(Code.GetSpecial);
+  }
+
+  public async setSpecial(dto: NamespaceSpecialSetDto) {
+    await this.namespaceSpecialModel.updateOne(
+      { name: dto.name },
+      { $set: { id: dto.id } },
+      { upsert: true }
+    );
+    await this.redis.setSpecial(dto.name, dto.id);
+    return this.successResult(Code.SetSpecial);
+  }
+
   public async inquiry({ id, author }: NamespaceInquiryDto): Promise<MicroserviceRes<any>> {
     const success = (await this.redis.existNamespace(id, author))
     return {
@@ -124,7 +152,6 @@ export default class NamespaceService implements OnModuleInit {
       }
     }
   }
-
 
   private successResult(code: number, payload?: any): Result<any> {
     return {

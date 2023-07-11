@@ -8,6 +8,8 @@ import NamespaceUpdateDto from './dto/namespace.update.dto';
 import NamespaceService from './namespace.service';
 import NamespaceIncludeDto from './dto/namespace.include.dto';
 import NamespaceThemeDto from './dto/namespace.theme.dto';
+import NamespaceSpecialSetDto from './dto/namespace.special.set.dto';
+import NamespaceSpecialGetDto from './dto/namespace.special.get.dto';
 
 @Controller()
 export default class NamespaceController {
@@ -69,4 +71,13 @@ export default class NamespaceController {
     return this.service.list();
   }
 
+  @MessagePattern('namespace.special.set')
+  public setSpecial(@Payload() dto: NamespaceSpecialSetDto) {
+    return this.service.setSpecial(dto);
+  }
+
+  @MessagePattern('namespace.special.get')
+  public getSpecial(@Payload() dto: NamespaceSpecialGetDto) {
+    return this.service.getSpecial(dto);
+  }
 }

@@ -2,14 +2,15 @@ import { Controller, OnModuleInit, Put, Inject, Get, UseGuards, SetMetadata, Req
 import { ClientKafka } from "@nestjs/microservices";
 import { Role } from "src/app.roles";
 import { AuthGuard } from "src/auth/auth.guard";
+import { NamespaceGuard } from "./guards/namespace.guard";
+import { ValidationPipeId } from "../services.pipe";
 import NamespaceAuthorDto from "./dto/namespace.author.dto";
 import NamespaceCreateDto from "./dto/namespace.create.dto";
 import NamespaceStateDto from "./dto/namespace.state.dto";
 import NamespaceUpdateDto from "./dto/namespace.update.dto";
-import { NamespaceGuard } from "./guards/namespace.guard";
 import NamespaceIncludeDto from "./dto/namespace.include.dto";
-import { ValidationPipeId } from "../services.pipe";
 import NamespaceThemeDto from "./dto/namespace.theme.dto";
+import NamespaceSpecialDto from "./dto/namespace.special.dtor";
 
 @Controller('namespace')
 export default class NamespaceController implements OnModuleInit {
@@ -27,6 +28,8 @@ export default class NamespaceController implements OnModuleInit {
     this.client.subscribeToResponseOf("namespace.list");
     this.client.subscribeToResponseOf("namespace.include");
     this.client.subscribeToResponseOf("namespace.theme");
+    this.client.subscribeToResponseOf("namespace.special.get");
+    this.client.subscribeToResponseOf("namespace.special.set");
   }
 
   @Get()
@@ -72,6 +75,17 @@ export default class NamespaceController implements OnModuleInit {
     return this.client.send("namespace.list", {})
   }
 
+  @Post("special")
+  @UseGuards(AuthGuard)
+  @SetMetadata("role", [Role.Manager])
+  public setSpecial(@Body(ValidationPipe) dto: NamespaceSpecialDto) {
+    return this.client.send("namespace.special.set", { ...dto });
+  }
+
+  @Get("special/:name")
+  public getSpecial(@Param('name') name: String) {
+    return this.client.send("namespace.special.get", { name: name });
+  }
 
   @Post(":id")
   @UseGuards(AuthGuard, NamespaceGuard)
