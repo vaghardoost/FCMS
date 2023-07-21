@@ -4,6 +4,7 @@ export default new Schema(
   {
     state: { type: String, required: true },
     name: { type: String, required: true },
+    description: { type: String, required: true },
     operator: { type: String, required: true },
     authors: { type: Array, required: true },
     founder: { type: String, required: true },

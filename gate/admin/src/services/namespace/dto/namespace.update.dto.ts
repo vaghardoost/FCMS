@@ -5,6 +5,10 @@ export default class NamespaceUpdateDto {
   @IsOptional()
   public name: string
 
+  @IsString()
+  @IsOptional()
+  public description: string
+
   @IsOptional()
   @IsString()
   public primaryColor: string

@@ -11,6 +11,10 @@ export default class NamespaceCreateDto {
   name: string;
 
   @IsString()
+  @IsNotEmpty()
+  description: string;
+
+  @IsString()
   @IsOptional()
   avatar: string;
 
