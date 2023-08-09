@@ -16,6 +16,7 @@ import NamespaceThemeDto from "./dto/namespace.theme.dto";
 import NamespaceSpecialGetDto from "./dto/namespace.special.get.dto";
 import NamespaceSpecialSetDto from "./dto/namespace.special.set.dto";
 import NamespaceSpecialModel from "./namespace.special.model";
+import NamespaceGetDto from "./dto/namespace.get.dto";
 
 @Injectable()
 export default class NamespaceService implements OnModuleInit {
@@ -34,7 +35,7 @@ export default class NamespaceService implements OnModuleInit {
     return this.successResult(Code.NamespaceInclude);
   }
 
-  public async get({ id }: { id: string }) {
+  public async getOwn({ id }: { id: string }) {
     const list = await this.redis.allNamespaces();
     const result = [];
     for (const key in list) {
@@ -105,7 +106,7 @@ export default class NamespaceService implements OnModuleInit {
     return this.successResult(Code.Reload);
   }
 
-  public async list() {
+  public async all() {
     const list = await this.redis.allNamespaces();
     const result = []
     for (const id in list) {
@@ -151,6 +152,22 @@ export default class NamespaceService implements OnModuleInit {
         success: success
       }
     }
+  }
+
+  public async get({ id }: NamespaceGetDto) {
+    const result = await this.redis.getNamespace(id);
+    if (result) {
+      delete result.founder;
+      delete result.include;
+      delete result.authors;
+      delete result.primaryColor;
+      delete result.secoundColor;
+      delete result.state;
+      delete result.theme;
+      delete result.operator;
+      return this.successResult(Code.GetNamespace, result);
+    }
+    return this.faildResult(Code.GetNamespace);
   }
 
   private successResult(code: number, payload?: any): Result<any> {

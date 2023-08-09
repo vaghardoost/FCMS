@@ -1,4 +1,4 @@
-import { Controller, ValidationPipe, Delete, Get, Inject, OnModuleInit, Body, Post, Put, Param, SetMetadata, UseGuards, Request } from "@nestjs/common";
+import { Controller, ValidationPipe, Delete, Get, Inject, OnModuleInit, Body, Post, Put, Param, SetMetadata, UseGuards, Request, Query } from "@nestjs/common";
 import { ClientKafka } from "@nestjs/microservices";
 import { NamespaceGuard } from "../namespace/guards/namespace.guard";
 import { AuthGuard } from "src/auth/auth.guard";
@@ -20,6 +20,7 @@ export default class DatapackController implements OnModuleInit {
     this.client.subscribeToResponseOf("datapack.namespace");
     this.client.subscribeToResponseOf("datapack.reload");
     this.client.subscribeToResponseOf("datapack.update");
+    this.client.subscribeToResponseOf("datapack.search");
   }
 
   @Put(":namespace")
@@ -36,6 +37,14 @@ export default class DatapackController implements OnModuleInit {
   @Get()
   public list() {
     return this.client.send('datapack.list', {});
+  }
+
+  @Get(':namespace/search')
+  public search(
+    @Query('title') title: string,
+    @Param('namespace', ValidationPipe) namespace: string
+  ) {
+    return this.client.send('datapack.search', { title: title, namespace: namespace });
   }
 
   @Delete(":namespace")

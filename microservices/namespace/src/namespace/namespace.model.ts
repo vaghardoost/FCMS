@@ -10,6 +10,7 @@ export default class NamespaceModel {
   founder: String;
   authors: String[];
   include: NamespaceType[];
+  operator: string;
   state: NamespaceState;
   theme?: string;
   datapack?: string;

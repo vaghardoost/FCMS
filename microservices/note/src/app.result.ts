@@ -24,7 +24,8 @@ export enum Code {
   NamespaceDatapack,
   DatapackList,
   UpdateDatapack,
-  DeleteDatapack
+  DeleteDatapack,
+  Search
 }
 
 export const ServiceError = { code:0,success:false,message:'service internal error' };

@@ -11,6 +11,15 @@ export class RedisDatapackService {
     private configService: ConfigService
   ) { }
 
+  public async cacheDatapack(id: string, datapack: any) {
+    await this.connection.redis.set(id, JSON.stringify(datapack));
+    await this.connection.redis.expire(id, this.configService.get<number>('REDIS_EXPIRETIME', 0) * 60);
+  }
+
+  public async getCache(id: string) {
+    return this.connection.redis.get(id);
+  }
+
   public setDatapack(id: string, datapack: any) {
     this.connection.redis.hset(this.redisDatapackName, { [id]: JSON.stringify(datapack) });
   }

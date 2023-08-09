@@ -24,19 +24,20 @@ export default class NamespaceController implements OnModuleInit {
     this.client.subscribeToResponseOf("namespace.update");
     this.client.subscribeToResponseOf("namespace.push");
     this.client.subscribeToResponseOf("namespace.pull");
-    this.client.subscribeToResponseOf("namespace.get");
-    this.client.subscribeToResponseOf("namespace.list");
+    this.client.subscribeToResponseOf("namespace.get.own");
+    this.client.subscribeToResponseOf("namespace.all");
     this.client.subscribeToResponseOf("namespace.include");
     this.client.subscribeToResponseOf("namespace.theme");
-    this.client.subscribeToResponseOf("namespace.special.get");
-    this.client.subscribeToResponseOf("namespace.special.set");
+    this.client.subscribeToResponseOf("namespace.get.special");
+    this.client.subscribeToResponseOf("namespace.set.special");
+    this.client.subscribeToResponseOf("namespace.get");
   }
 
   @Get()
   @UseGuards(AuthGuard)
   @SetMetadata("role", [Role.Admin, Role.Author])
   public getAuthorNamespace(@Request() req: any) {
-    return this.client.send("namespace.get", { id: req.user.id })
+    return this.client.send("namespace.get.own", { id: req.user.id })
   }
 
   @Put()
@@ -72,19 +73,24 @@ export default class NamespaceController implements OnModuleInit {
   @UseGuards(AuthGuard)
   @SetMetadata("role", [Role.Manager, Role.Operator])
   public list() {
-    return this.client.send("namespace.list", {})
+    return this.client.send("namespace.all", {})
   }
 
   @Post("special")
   @UseGuards(AuthGuard)
   @SetMetadata("role", [Role.Manager])
   public setSpecial(@Body(ValidationPipe) dto: NamespaceSpecialDto) {
-    return this.client.send("namespace.special.set", { ...dto });
+    return this.client.send("namespace.set.special", { ...dto });
   }
 
   @Get("special/:name")
   public getSpecial(@Param('name') name: String) {
-    return this.client.send("namespace.special.get", { name: name });
+    return this.client.send("namespace.get.special", { name: name });
+  }
+
+  @Get(":id")
+  public getNamespace(@Param('id') id: String){
+    return this.client.send("namespace.get", { id: id });
   }
 
   @Post(":id")

@@ -10,6 +10,7 @@ import NamespaceIncludeDto from './dto/namespace.include.dto';
 import NamespaceThemeDto from './dto/namespace.theme.dto';
 import NamespaceSpecialSetDto from './dto/namespace.special.set.dto';
 import NamespaceSpecialGetDto from './dto/namespace.special.get.dto';
+import NamespaceGetDto from './dto/namespace.get.dto';
 
 @Controller()
 export default class NamespaceController {
@@ -56,9 +57,9 @@ export default class NamespaceController {
     return this.service.pull(dto)
   }
 
-  @MessagePattern('namespace.get')
-  public get(@Payload() dto: { id: string }) {
-    return this.service.get(dto);
+  @MessagePattern('namespace.get.own')
+  public getOwn(@Payload() dto: { id: string }) {
+    return this.service.getOwn(dto);
   }
 
   @MessagePattern('namespace.theme')
@@ -66,18 +67,23 @@ export default class NamespaceController {
     return this.service.theme(dto);
   }
 
-  @MessagePattern('namespace.list')
-  public list() {
-    return this.service.list();
+  @MessagePattern('namespace.all')
+  public all() {
+    return this.service.all();
   }
 
-  @MessagePattern('namespace.special.set')
+  @MessagePattern('namespace.set.special')
   public setSpecial(@Payload() dto: NamespaceSpecialSetDto) {
     return this.service.setSpecial(dto);
   }
 
-  @MessagePattern('namespace.special.get')
+  @MessagePattern('namespace.get.special')
   public getSpecial(@Payload() dto: NamespaceSpecialGetDto) {
     return this.service.getSpecial(dto);
+  }
+
+  @MessagePattern('namespace.get')
+  public get(@Payload() dto:NamespaceGetDto) {
+    return this.service.get(dto);
   }
 }

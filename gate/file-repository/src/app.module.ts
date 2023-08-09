@@ -53,9 +53,9 @@ export class AppModule implements NestModule, OnModuleInit {
   ) { }
 
   async onModuleInit() {
-    this.client.subscribeToResponseOf("namespace.list");
+    this.client.subscribeToResponseOf("namespace.all");
     await this.client.connect();
-    const res = this.client.send<any[]>('namespace.list', {});
+    const res = this.client.send<any[]>('namespace.all', {});
     const { payload } = await new Promise<any>(resolve => {
       res.subscribe(response => { resolve(response) })
     });

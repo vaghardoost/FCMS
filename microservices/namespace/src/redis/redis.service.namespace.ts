@@ -16,8 +16,10 @@ export default class RedisNamespaceService {
   }
 
   public async getNamespace(id: string) {
-    const result: NamespaceModel = JSON.parse(await this.service.redis.hget(this.namespaceMapName, id));
-    return result;
+    const raw = await this.service.redis.hget(this.namespaceMapName, id);
+    return (raw)
+      ? JSON.parse(raw) as NamespaceModel
+      : null;
   }
 
   public async setNamespace(id: string, data: NamespaceModel) {

@@ -6,6 +6,7 @@ import DatapackNamespaceDto from "./dto/datapack.namespace.dto";
 import DatapackUpdateDto from "./dto/datapack.update.dto";
 import DatapackDeleteDto from "./dto/datapack.delete.dto";
 import DatapackGetDto from "./dto/datapack.get.dto";
+import DatapackSearchDto from "./dto/datapack.search.dto";
 
 @Controller('datapack')
 export default class DatapackController {
@@ -47,4 +48,8 @@ export default class DatapackController {
     return this.service.reload();
   }
 
+  @MessagePattern('datapack.search')
+  public search(@Payload() dto: DatapackSearchDto) {
+    return this.service.search(dto);
+  }
 }

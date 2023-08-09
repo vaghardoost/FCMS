@@ -23,9 +23,14 @@ export class AuthService implements OnModuleInit {
         const { header, response } = message;
         if (header.code === HeaderCode.SUCCESS) {
           const secret = this.configService.get<string>('TOKEN_SECRET');
-          const ttl = this.configService.get<string>('TOKEN_TTL');
+          const ttl = this.configService.get<string>('TOKEN_TTL', '0');
           const { payload } = header
-          response.payload = { token: sign({ ...payload }, secret, { expiresIn: ttl || '0' }) }
+          response.payload = {
+            token: sign({ ...payload }
+              , secret,
+              (ttl !== '0') ? { expiresIn: ttl } : {}
+            )
+          }
         }
         resolve(response)
       })

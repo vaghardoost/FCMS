@@ -35,23 +35,23 @@ services:
   # ---------------------- builds ----------------------
   # only API and file exposed to host
   # rest gateways
-  api-public:
-    build: ./gate/public
-    container_name: api-public
-    ports:
-      - 31374:1374
-    depends_on:
-      - kafka
-      - redis
-    volumes:
-      - ./volumes/shared:/usr/app/shared
-    environment:
-      - NAME=api_public
-      - PORT=1374
-      - TOKEN_SECRET=secret
-      - TOEKN_TTL=4h
-      - KAFKA_BROKERS=kafka:9092
-      - KAFKA_CONSUMER=rest_api_gate
+  # api-public:
+  #   build: ./gate/public
+  #   container_name: api-public
+  #   ports:
+  #     - 31374:1374
+  #   depends_on:
+  #     - kafka
+  #     - redis
+  #   volumes:
+  #     - ./volumes/shared:/usr/app/shared
+  #   environment:
+  #     - NAME=api_public
+  #     - PORT=1374
+  #     - TOKEN_SECRET=secret
+  #     - TOEKN_TTL=4h
+  #     - KAFKA_BROKERS=kafka:9092
+  #     - KAFKA_CONSUMER=rest_api_gate
   api-admin:
     build: ./gate/admin
     container_name: api-admin
